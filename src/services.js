@@ -114,7 +114,7 @@ async function createSale(s, user) {
 const listSales = (taxYear) => db.select(T.sales.name, taxYear ? { TaxYear: taxYear } : {}, 'SaleDate DESC');
 
 // ---------- Dashboard ----------
-async function dashboard(taxYear) {
+async function dashboard(taxYear, calendarYear) {
   const [sales, purchases, items] = await Promise.all([
     db.select(T.sales.name),
     db.select(T.purchases.name),
@@ -135,7 +135,7 @@ async function dashboard(taxYear) {
   const unsold = items.filter((i) => i.Ownership === 'Business' && (i.Status === 'In stock' || i.Status === 'Listed'));
 
   // Platform reporting (DAC7) works on CALENDAR years and includes personal sales.
-  const calYear = String(new Date().getFullYear());
+  const calYear = calendarYear || String(new Date().getFullYear());
   const platforms = {};
   for (const s of live.filter((x) => String(x.SaleDate).startsWith(calYear))) {
     const p = (platforms[s.Channel] = platforms[s.Channel] || { count: 0, gross: 0, business: 0, personal: 0 });
@@ -169,15 +169,31 @@ async function dashboard(taxYear) {
   };
 }
 
+// Tax years always offered, even before any records exist for them
+// (2025-26 is the first year the business needs to file).
+const FIRST_TAX_YEAR = '2025-26';
+
 async function taxYearsInUse() {
   const [sales, purchases] = await Promise.all([db.select(T.sales.name), db.select(T.purchases.name)]);
-  const set = new Set([taxYearOf(today()), ...sales.map((s) => s.TaxYear), ...purchases.map((p) => p.TaxYear)]);
+  const current = taxYearOf(today());
+  const set = new Set([current, ...sales.map((s) => s.TaxYear), ...purchases.map((p) => p.TaxYear)]);
+  // every year from FIRST_TAX_YEAR up to the current one
+  for (let y = Number(FIRST_TAX_YEAR.slice(0, 4)); y <= Number(current.slice(0, 4)); y++) {
+    set.add(`${y}-${String((y + 1) % 100).padStart(2, '0')}`);
+  }
   return [...set].filter(Boolean).sort().reverse();
+}
+
+// Calendar years for the platform reporting check
+async function calendarYearsInUse() {
+  const sales = await db.select(T.sales.name);
+  const set = new Set([String(new Date().getFullYear()), FIRST_TAX_YEAR.slice(0, 4), ...sales.map((s) => String(s.SaleDate).slice(0, 4))]);
+  return [...set].filter((y) => /^\d{4}$/.test(y)).sort().reverse();
 }
 
 module.exports = {
   createPurchase, listPurchases, getPurchase,
   createItem, listItems, getItem, updateItemStatus,
   createSale, listSales,
-  dashboard, taxYearsInUse,
+  dashboard, taxYearsInUse, calendarYearsInUse,
 };

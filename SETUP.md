@@ -1,4 +1,4 @@
-# Clothing Portal — setup (v0.1.0)
+# Clothing Portal — setup (v0.1.1)
 
 ## 1. Create the Caspio tables
 
@@ -64,7 +64,7 @@ Optional: add indexes on `TaxYear` (Purchases, Sales) and `Status` (Items).
 2. Give it **Read, Insert and Update** on the three CSP_ tables (no Delete needed).
 3. Open the profile and copy the **Client ID**, **Client Secret**, **Token Endpoint URL** and the **REST API v3 Integration URL**.
    - Token URL looks like `https://c1xxxxxx.caspio.com/oauth/token`
-   - REST URL looks like `https://c1xxxxxx.caspio.com/rest/v3` (some accounts show `…/integrations/rest/v3` — use exactly what Caspio shows).
+   - REST URL looks like `https://c1xxxxxx.caspio.com/rest/v3` or, on newer accounts, `https://c1xxxxxx.caspio.com/integrations/rest/v3`. Check by opening `…/integrations/rest/swagger` in a browser: if it loads, use the `/integrations/rest/v3` form. A 404 with an empty body from the app means this URL is wrong.
 
 ## 3. Try it locally (optional)
 

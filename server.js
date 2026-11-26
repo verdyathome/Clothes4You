@@ -65,7 +65,9 @@ app.use(requireLogin);
 app.get('/', wrap(async (req, res) => {
   const years = await svc.taxYearsInUse();
   const ty = years.includes(req.query.ty) ? req.query.ty : taxYearOf(today());
-  res.render('dashboard', { d: await svc.dashboard(ty), years });
+  const calYears = await svc.calendarYearsInUse();
+  const cy = calYears.includes(req.query.cy) ? req.query.cy : String(new Date().getFullYear());
+  res.render('dashboard', { d: await svc.dashboard(ty, cy), years, calYears });
 }));
 
 // ---------- Purchases ----------

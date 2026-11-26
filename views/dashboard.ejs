@@ -2,6 +2,7 @@
 <div class="head-row">
   <h1>Tax year <%= d.taxYear %></h1>
   <form method="get" class="inline">
+    <input type="hidden" name="cy" value="<%= d.calYear %>">
     <select name="ty" onchange="this.form.submit()">
       <% years.forEach(y => { %><option <%= y === d.taxYear ? 'selected' : '' %>><%= y %></option><% }) %>
     </select>
@@ -48,7 +49,15 @@
 </div>
 
 <section class="card">
-  <h2>Platform reporting check — calendar year <%= d.calYear %></h2>
+  <div class="head-row">
+    <h2>Platform reporting check — calendar year <%= d.calYear %></h2>
+    <form method="get" class="inline">
+      <input type="hidden" name="ty" value="<%= d.taxYear %>">
+      <select name="cy" onchange="this.form.submit()">
+        <% calYears.forEach(y => { %><option <%= y === d.calYear ? 'selected' : '' %>><%= y %></option><% }) %>
+      </select>
+    </form>
+  </div>
   <p class="muted small">Vinted and eBay report sellers to HMRC per calendar year once they reach 30 sales or about £1,700, <em>including personal items</em>. These totals should line up with what each platform reports.</p>
   <% const names = Object.keys(d.platforms); %>
   <% if (!names.length) { %><p>No sales yet this calendar year.</p><% } else { %>
