@@ -66,4 +66,9 @@ button.link { border: 0; background: none; color: var(--accent); padding: 4px; }
 
 .pill { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: .8rem; background: #eee; white-space: nowrap; }
 .pill.instock { background: #e8eef9; } .pill.listed { background: #fff1d6; } .pill.sold { background: var(--ok); color: var(--ok-ink); } .pill.writtenoff { background: #eee; color: var(--muted); }
+[hidden] { display: none !important; }
+details.refund { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+details.refund summary { cursor: pointer; color: var(--accent); margin-bottom: 10px; }
+.list tfoot td { border-bottom: 0; }
+code { background: #f1ede8; padding: 1px 5px; border-radius: 4px; }
 .foot { text-align: center; color: var(--muted); font-size: .8rem; padding: 20px; }

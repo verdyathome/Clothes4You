@@ -1,0 +1,43 @@
+<%- include('partials/header', { title: 'Check eBay import' }) %>
+<h1>Check eBay import</h1>
+<p class="muted">Choose the portal item for each order. Orders left as "Don't import" are skipped. Each item can only be used once.</p>
+<% if (skipped.refunds || skipped.otherFees || skipped.other) { %>
+  <div class="banner warn">
+    Not imported: <%= skipped.refunds %> refund line(s) — record refunds on the sale instead; <%= skipped.otherFees %> other fee line(s) (e.g. promoted listings) — add as an expense if needed<%= skipped.other ? '; ' + skipped.other + ' other line(s)' : '' %>.
+  </div>
+<% } %>
+<form method="post" action="/import/ebay/confirm">
+  <table class="list">
+    <thead><tr><th>Date</th><th>eBay order</th><th class="num">Price</th><th class="num">Postage in</th><th class="num">Fees</th><th class="num">Label</th><th>Portal item</th></tr></thead>
+    <tbody>
+    <% rows.forEach((r, i) => { %>
+      <tr class="<%= r.duplicate ? 'personal' : '' %>">
+        <td><%= ukDate(r.date) || '?' %></td>
+        <td><%= r.title %><div class="muted small"><%= r.orderRef %><%= r.customLabel ? ' · SKU ' + r.customLabel : '' %><%= r.quantity > 1 ? ' · qty ' + r.quantity : '' %><%= r.extraLines ? ' · +' + r.extraLines + ' more line(s)' : '' %></div></td>
+        <td class="num"><%= money(r.price) %></td><td class="num"><%= money(r.buyerPostage) %></td><td class="num"><%= money(r.fee) %></td><td class="num"><%= money(r.postageCost) %></td>
+        <td>
+          <% if (r.duplicate) { %>
+            <span class="muted">Already imported</span>
+          <% } else if (!r.date) { %>
+            <span class="muted">No date — record manually</span>
+          <% } else { %>
+            <input type="hidden" name="rows[<%= i %>][OrderRef]" value="<%= r.orderRef %>">
+            <input type="hidden" name="rows[<%= i %>][SaleDate]" value="<%= r.date %>">
+            <input type="hidden" name="rows[<%= i %>][SalePrice]" value="<%= r.price %>">
+            <input type="hidden" name="rows[<%= i %>][BuyerPostage]" value="<%= r.buyerPostage %>">
+            <input type="hidden" name="rows[<%= i %>][PlatformFee]" value="<%= r.fee %>">
+            <input type="hidden" name="rows[<%= i %>][PostageCost]" value="<%= r.postageCost %>">
+            <select name="rows[<%= i %>][ItemID]" class="item-pick">
+              <option value="">Don't import</option>
+              <% available.forEach(it => { %><option value="<%= it.ItemID %>" <%= r.itemId === it.ItemID ? 'selected' : '' %>>#<%= it.ItemID %> <%= it.Description %><%= it.Size ? ' · ' + it.Size : '' %><%= it.Ownership === 'Personal' ? ' (personal)' : '' %></option><% }) %>
+            </select>
+          <% } %>
+        </td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <p class="muted small">If an order isn't in the portal yet, add the item first (stock purchase or personal item), then import the file again.</p>
+  <button type="submit" class="primary big">Import selected orders</button>
+</form>
+<%- include('partials/footer') %>

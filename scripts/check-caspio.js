@@ -6,7 +6,8 @@ const { TABLES } = require('../src/config');
 const EXPECTED = {
   items: ['ItemID', 'Description', 'Brand', 'Size', 'Category', 'Condition', 'Ownership', 'PurchaseID', 'CostAllocated', 'Status', 'ListedOn', 'DateAdded', 'Notes', 'CreatedBy'],
   purchases: ['PurchaseID', 'PurchaseDate', 'Supplier', 'SourceType', 'PaymentMethod', 'TotalCost', 'ItemCount', 'ReceiptRef', 'Notes', 'TaxYear', 'CreatedBy'],
-  sales: ['SaleID', 'ItemID', 'SaleDate', 'Channel', 'OrderRef', 'SalePrice', 'BuyerPostage', 'PlatformFee', 'PostageCost', 'Ownership', 'ItemCost', 'TaxYear', 'Refunded', 'Notes', 'CreatedBy'],
+  sales: ['SaleID', 'ItemID', 'SaleDate', 'Channel', 'OrderRef', 'SalePrice', 'BuyerPostage', 'PlatformFee', 'PostageCost', 'Ownership', 'ItemCost', 'TaxYear', 'Refunded', 'RefundDate', 'RefundAmount', 'ItemReturned', 'Notes', 'CreatedBy'],
+  expenses: ['ExpenseID', 'ExpenseDate', 'Description', 'ExpenseType', 'SA103Category', 'Amount', 'Miles', 'Supplier', 'PaymentMethod', 'TaxYear', 'Receipt', 'Notes', 'CreatedBy'],
 };
 
 (async () => {

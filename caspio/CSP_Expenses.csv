@@ -1,0 +1,2 @@
+ExpenseDate,Description,ExpenseType,SA103Category,Amount,Miles,Supplier,PaymentMethod,TaxYear,Notes,CreatedBy
+2025-10-01,SAMPLE - delete me,Packaging (mailers / tissue / tape),Other allowable business expenses,12.00,0,Amazon,Card,2025-26,Sample row,import

@@ -1,8 +1,8 @@
-# Clothing Portal — setup (v0.1.1)
+# Clothing Portal — setup (v0.2.0)
 
 ## 1. Create the Caspio tables
 
-Create three tables in Caspio. Field names are case-sensitive and must match exactly.
+Create four tables in Caspio (CSP_Expenses was added in v0.2.0). Field names are case-sensitive and must match exactly.
 
 ### CSP_Purchases
 | Field | Caspio type | Notes |
@@ -52,16 +52,38 @@ Create three tables in Caspio. Field names are case-sensitive and must match exa
 | Ownership | Text (255) | copied from the item |
 | ItemCost | Number | copied from the item |
 | TaxYear | Text (255) | set by the app |
-| Refunded | Yes/No | for the refunds feature in a later version |
+| Refunded | Yes/No | set when a refund is recorded |
+| RefundDate | Date/Time | date the refund was paid *(v0.2.0)* |
+| RefundAmount | Number | *(v0.2.0)* |
+| ItemReturned | Yes/No | item came back into stock *(v0.2.0)* |
 | Notes | Text (64000) | |
 | CreatedBy | Text (255) | |
+
+### CSP_Expenses *(v0.2.0)*
+| Field | Caspio type | Notes |
+|---|---|---|
+| ExpenseID | AutoNumber | unique |
+| ExpenseDate | Date/Time | date paid |
+| Description | Text (255) | |
+| ExpenseType | Text (255) | e.g. Packaging, Mileage |
+| SA103Category | Text (255) | set by the app from the type |
+| Amount | Number | |
+| Miles | Number | mileage claims only (45p/mile) |
+| Supplier | Text (255) | |
+| PaymentMethod | Text (255) | |
+| TaxYear | Text (255) | set by the app |
+| Receipt | Attachment | photo or PDF |
+| Notes | Text (64000) | |
+| CreatedBy | Text (255) | |
+
+`caspio/CSP_Expenses.csv` can be imported to create it — then set the types above, add `ExpenseID` (AutoNumber) and `Receipt` (Attachment), and delete the sample row.
 
 Optional: add indexes on `TaxYear` (Purchases, Sales) and `Status` (Items).
 
 ## 2. Create a Caspio Web Services profile
 
 1. Caspio → **Access Permissions → Web Services Profiles → New Profile**.
-2. Give it **Read, Insert and Update** on the three CSP_ tables (no Delete needed).
+2. Give it **Read, Insert and Update** on all four CSP_ tables (no Delete needed). Include CSP_Expenses so receipt uploads work.
 3. Open the profile and copy the **Client ID**, **Client Secret**, **Token Endpoint URL** and the **REST API v3 Integration URL**.
    - Token URL looks like `https://c1xxxxxx.caspio.com/oauth/token`
    - REST URL looks like `https://c1xxxxxx.caspio.com/rest/v3` or, on newer accounts, `https://c1xxxxxx.caspio.com/integrations/rest/v3`. Check by opening `…/integrations/rest/swagger` in a browser: if it loads, use the `/integrations/rest/v3` form. A 404 with an empty body from the app means this URL is wrong.

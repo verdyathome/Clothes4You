@@ -3,6 +3,7 @@ const { TABLES } = require('../config');
 
 const store = {};
 const counters = {};
+const attachments = {};
 const idField = Object.fromEntries(Object.values(TABLES).map((t) => [t.name, t.id]));
 
 function matches(row, filter) {
@@ -22,7 +23,7 @@ async function select(table, filter = {}, orderBy) {
 async function insert(table, row) {
   store[table] = store[table] || [];
   counters[table] = (counters[table] || 0) + 1;
-  const created = { ...row, [idField[table]]: counters[table] };
+  const created = { ...row, PK_ID: counters[table], [idField[table]]: counters[table] };
   store[table].push(created);
   return { ...created };
 }
@@ -38,4 +39,14 @@ async function update(table, filter, fields) {
   return n;
 }
 
-module.exports = { select, insert, update, name: 'memory' };
+async function uploadAttachment(table, field, pkId, file) {
+  attachments[`${table}/${field}/${pkId}`] = { buffer: file.buffer, contentType: file.mimetype };
+  const row = (store[table] || []).find((r) => r.PK_ID === Number(pkId));
+  if (row) row[field] = `/${file.filename}`;
+}
+
+async function downloadAttachment(table, field, pkId) {
+  return attachments[`${table}/${field}/${pkId}`] || null;
+}
+
+module.exports = { select, insert, update, uploadAttachment, downloadAttachment, name: 'memory' };

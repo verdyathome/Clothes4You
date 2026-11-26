@@ -4,19 +4,24 @@
   <form method="get" class="inline">
     <select name="ty" onchange="this.form.submit()"><% years.forEach(y => { %><option <%= y === ty ? 'selected' : '' %>><%= y %></option><% }) %></select>
   </form>
-  <a class="btn primary" href="/sales/new">+ Record sale</a>
+  <div class="actions">
+    <a class="btn" href="/import/ebay">Import eBay CSV</a>
+    <a class="btn primary" href="/sales/new">+ Record sale</a>
+  </div>
 </div>
 <% if (!sales.length) { %><p>No sales in this tax year yet.</p><% } else { %>
 <table class="list">
-  <thead><tr><th>Date</th><th>Item</th><th>Where</th><th>Type</th><th class="num">Price</th><th class="num">Postage in</th><th class="num">Fee</th><th class="num">Postage out</th></tr></thead>
+  <thead><tr><th>Date</th><th>Item</th><th>Where</th><th>Type</th><th class="num">Price</th><th class="num">Postage in</th><th class="num">Fee</th><th class="num">Postage out</th><th>Refund</th></tr></thead>
   <tbody>
   <% sales.forEach(s => { %>
     <tr class="<%= s.Ownership === 'Personal' ? 'personal' : '' %>">
       <td><%= ukDate(s.SaleDate) %></td><td><a href="/items/<%= s.ItemID %>">#<%= s.ItemID %></a></td><td><%= s.Channel %></td><td><%= s.Ownership %></td>
       <td class="num"><%= money(s.SalePrice) %></td><td class="num"><%= money(s.BuyerPostage) %></td><td class="num"><%= money(s.PlatformFee) %></td><td class="num"><%= money(s.PostageCost) %></td>
+      <td><%= s.Refunded ? '−' + money(s.RefundAmount) + ' ' + ukDate(s.RefundDate) : '' %></td>
     </tr>
   <% }) %>
   </tbody>
 </table>
+<p class="muted small">Listed by sale date. A refund counts against the tax year it was paid in.</p>
 <% } %>
 <%- include('partials/footer') %>
