@@ -1,0 +1,17 @@
+<%- include('partials/header', { title: 'Personal item' }) %>
+<h1>Add a personal item</h1>
+<p class="muted">Use this for her own clothes she's selling. They're tracked so platform totals reconcile, but they don't count as business turnover. Stock bought to resell goes in through <a href="/purchases/new">Stock purchase</a> so its cost is recorded.</p>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<form method="post" action="/items" class="card">
+  <div class="fields">
+    <label>Description * <input name="Description" value="<%= form.Description || '' %>" required></label>
+    <label>Brand <input name="Brand" value="<%= form.Brand || '' %>"></label>
+    <label>Size <input name="Size" value="<%= form.Size || '' %>"></label>
+    <label>Category <select name="Category"><option value=""></option><% LISTS.categories.forEach(c => { %><option <%= form.Category === c ? 'selected' : '' %>><%= c %></option><% }) %></select></label>
+    <label>Condition <select name="Condition"><option value=""></option><% LISTS.condition.forEach(c => { %><option <%= form.Condition === c ? 'selected' : '' %>><%= c %></option><% }) %></select></label>
+    <label>Date added <input type="date" name="DateAdded" value="<%= form.DateAdded || '' %>" required></label>
+  </div>
+  <label>Notes <textarea name="Notes" rows="2"><%= form.Notes || '' %></textarea></label>
+  <button type="submit" class="primary">Save personal item</button>
+</form>
+<%- include('partials/footer') %>

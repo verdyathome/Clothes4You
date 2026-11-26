@@ -1,0 +1,52 @@
+<%- include('partials/header', { title: 'New purchase' }) %>
+<h1>Stock purchase</h1>
+<p class="muted">Record clothes bought to resell. For a bundle, add every item: leave item costs blank and the total is shared equally, or fill in some costs and the rest is shared.</p>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<form method="post" action="/purchases" id="purchase-form">
+  <section class="card">
+    <div class="fields">
+      <label>Date paid <input type="date" name="PurchaseDate" value="<%= form.PurchaseDate || '' %>" required></label>
+      <label>Total paid (£) <input name="TotalCost" inputmode="decimal" value="<%= form.TotalCost || '' %>" required id="total-cost"></label>
+      <label>Bought from <input name="Supplier" value="<%= form.Supplier || '' %>" placeholder="e.g. British Heart Foundation, Leeds"></label>
+      <label>Source
+        <select name="SourceType"><% LISTS.purchaseSources.forEach(s => { %><option <%= form.SourceType === s ? 'selected' : '' %>><%= s %></option><% }) %></select>
+      </label>
+      <label>Paid by
+        <select name="PaymentMethod"><% LISTS.paymentMethods.forEach(s => { %><option <%= form.PaymentMethod === s ? 'selected' : '' %>><%= s %></option><% }) %></select>
+      </label>
+      <label>Receipt ref <input name="ReceiptRef" value="<%= form.ReceiptRef || '' %>" placeholder="order no. / receipt no."></label>
+    </div>
+    <label>Notes <textarea name="Notes" rows="2"><%= form.Notes || '' %></textarea></label>
+  </section>
+
+  <section class="card">
+    <div class="head-row"><h2>Items</h2><span class="muted" id="alloc-hint"></span></div>
+    <div id="item-rows">
+      <% items.forEach((it, i) => { %>
+      <div class="item-row">
+        <input name="items[<%= i %>][Description]" value="<%= it.Description || '' %>" placeholder="Description *" class="wide">
+        <input name="items[<%= i %>][Brand]" value="<%= it.Brand || '' %>" placeholder="Brand">
+        <input name="items[<%= i %>][Size]" value="<%= it.Size || '' %>" placeholder="Size" class="short">
+        <select name="items[<%= i %>][Category]"><option value="">Category</option><% LISTS.categories.forEach(c => { %><option <%= it.Category === c ? 'selected' : '' %>><%= c %></option><% }) %></select>
+        <select name="items[<%= i %>][Condition]"><option value="">Condition</option><% LISTS.condition.forEach(c => { %><option <%= it.Condition === c ? 'selected' : '' %>><%= c %></option><% }) %></select>
+        <input name="items[<%= i %>][Cost]" value="<%= it.Cost || '' %>" placeholder="Cost £ (blank = share)" inputmode="decimal" class="cost">
+        <button type="button" class="link remove-row" aria-label="Remove item">✕</button>
+      </div>
+      <% }) %>
+    </div>
+    <button type="button" class="btn" id="add-row">+ Add item</button>
+  </section>
+  <button type="submit" class="primary big">Save purchase</button>
+</form>
+<template id="row-template">
+  <div class="item-row">
+    <input name="items[__i__][Description]" placeholder="Description *" class="wide">
+    <input name="items[__i__][Brand]" placeholder="Brand">
+    <input name="items[__i__][Size]" placeholder="Size" class="short">
+    <select name="items[__i__][Category]"><option value="">Category</option><% LISTS.categories.forEach(c => { %><option><%= c %></option><% }) %></select>
+    <select name="items[__i__][Condition]"><option value="">Condition</option><% LISTS.condition.forEach(c => { %><option><%= c %></option><% }) %></select>
+    <input name="items[__i__][Cost]" placeholder="Cost £ (blank = share)" inputmode="decimal" class="cost">
+    <button type="button" class="link remove-row" aria-label="Remove item">✕</button>
+  </div>
+</template>
+<%- include('partials/footer') %>

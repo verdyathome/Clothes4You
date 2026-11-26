@@ -1,0 +1,57 @@
+<%- include('partials/header', { title: 'Item #' + item.ItemID }) %>
+<div class="head-row">
+  <h1>#<%= item.ItemID %> <%= item.Description %></h1>
+  <span class="pill <%= item.Status.replace(/\s/g,'').toLowerCase() %>"><%= item.Status %></span>
+</div>
+<section class="card">
+  <table class="kv">
+    <tr><td>Type</td><td><%= item.Ownership %><%= item.Ownership === 'Personal' ? ' (not business turnover)' : '' %></td></tr>
+    <tr><td>Brand / size</td><td><%= [item.Brand, item.Size].filter(Boolean).join(' · ') || '—' %></td></tr>
+    <tr><td>Category / condition</td><td><%= [item.Category, item.Condition].filter(Boolean).join(' · ') || '—' %></td></tr>
+    <% if (item.Ownership === 'Business') { %>
+      <tr><td>Cost</td><td><%= money(item.CostAllocated) %><% if (item.PurchaseID) { %> · from <a href="/purchases/<%= item.PurchaseID %>">purchase #<%= item.PurchaseID %></a><% } %></td></tr>
+    <% } %>
+    <tr><td>Added</td><td><%= ukDate(item.DateAdded) %></td></tr>
+    <% if (item.ListedOn) { %><tr><td><%= item.Status === 'Sold' ? 'Sold on' : 'Listed on' %></td><td><%= item.ListedOn %></td></tr><% } %>
+    <% if (item.Notes) { %><tr><td>Notes</td><td><%= item.Notes %></td></tr><% } %>
+  </table>
+</section>
+
+<% if (sale) { %>
+<section class="card">
+  <h2>Sale #<%= sale.SaleID %></h2>
+  <table class="kv">
+    <tr><td>Date / where</td><td><%= ukDate(sale.SaleDate) %> · <%= sale.Channel %><%= sale.OrderRef ? ' · ' + sale.OrderRef : '' %></td></tr>
+    <tr><td>Sale price</td><td><%= money(sale.SalePrice) %></td></tr>
+    <tr><td>Postage charged to buyer</td><td><%= money(sale.BuyerPostage) %></td></tr>
+    <tr><td>Platform fee</td><td><%= money(sale.PlatformFee) %></td></tr>
+    <tr><td>Postage she paid</td><td><%= money(sale.PostageCost) %></td></tr>
+    <% if (item.Ownership === 'Business') { const profit = sale.SalePrice + sale.BuyerPostage - sale.PlatformFee - sale.PostageCost - sale.ItemCost; %>
+    <tr class="total"><td>Profit on this item</td><td><%= money(profit) %></td></tr>
+    <% } %>
+  </table>
+</section>
+<% } else if (item.Status !== 'Written off') { %>
+<div class="actions">
+  <a class="btn primary" href="/sales/new?item=<%= item.ItemID %>">Record sale</a>
+</div>
+<section class="card">
+  <h2>Update status</h2>
+  <form method="post" action="/items/<%= item.ItemID %>/status" class="fields">
+    <label>Status
+      <select name="Status">
+        <% ['In stock','Listed','Written off'].forEach(s => { %><option <%= item.Status === s ? 'selected' : '' %>><%= s %></option><% }) %>
+      </select>
+    </label>
+    <label>Listed on
+      <select name="ListedOn"><option value=""></option><% LISTS.channels.forEach(c => { %><option <%= item.ListedOn === c ? 'selected' : '' %>><%= c %></option><% }) %></select>
+    </label>
+    <button type="submit" class="btn">Update</button>
+  </form>
+</section>
+<% } else { %>
+<section class="card">
+  <form method="post" action="/items/<%= item.ItemID %>/status"><input type="hidden" name="Status" value="In stock"><button class="btn">Put back in stock</button></form>
+</section>
+<% } %>
+<%- include('partials/footer') %>

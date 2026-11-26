@@ -1,0 +1,24 @@
+<%- include('partials/header', { title: 'Purchase #' + p.PurchaseID }) %>
+<h1>Purchase #<%= p.PurchaseID %></h1>
+<section class="card">
+  <table class="kv">
+    <tr><td>Date paid</td><td><%= ukDate(p.PurchaseDate) %> (tax year <%= p.TaxYear %>)</td></tr>
+    <tr><td>Bought from</td><td><%= p.Supplier || '—' %> · <%= p.SourceType %></td></tr>
+    <tr><td>Paid by</td><td><%= p.PaymentMethod %></td></tr>
+    <tr><td>Total</td><td><strong><%= money(p.TotalCost) %></strong></td></tr>
+    <tr><td>Receipt ref</td><td><%= p.ReceiptRef || '—' %></td></tr>
+    <% if (p.Notes) { %><tr><td>Notes</td><td><%= p.Notes %></td></tr><% } %>
+  </table>
+</section>
+<section class="card">
+  <h2>Items (<%= items.length %>)</h2>
+  <table class="list">
+    <thead><tr><th>#</th><th>Item</th><th>Status</th><th class="num">Cost</th></tr></thead>
+    <tbody>
+    <% items.forEach(i => { %>
+      <tr><td><a href="/items/<%= i.ItemID %>">#<%= i.ItemID %></a></td><td><%= i.Description %><% if (i.Brand) { %> · <%= i.Brand %><% } %><% if (i.Size) { %> · <%= i.Size %><% } %></td><td><span class="pill <%= i.Status.replace(/\s/g,'').toLowerCase() %>"><%= i.Status %></span></td><td class="num"><%= money(i.CostAllocated) %></td></tr>
+    <% }) %>
+    </tbody>
+  </table>
+</section>
+<%- include('partials/footer') %>

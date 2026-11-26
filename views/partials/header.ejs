@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>Clothing Portal</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<% if (user) { %>
+<header class="topbar">
+  <a class="brand" href="/">Clothing Portal</a>
+  <nav>
+    <a href="/" class="<%= path === '/' ? 'on' : '' %>">Dashboard</a>
+    <a href="/items" class="<%= path.startsWith('/items') ? 'on' : '' %>">Items</a>
+    <a href="/purchases" class="<%= path.startsWith('/purchases') ? 'on' : '' %>">Purchases</a>
+    <a href="/sales" class="<%= path.startsWith('/sales') ? 'on' : '' %>">Sales</a>
+  </nav>
+  <form method="post" action="/logout" class="logout"><button type="submit" class="link"><%= user %> · Log out</button></form>
+</header>
+<% } %>
+<main>
+<% if (backend === 'memory') { %><div class="banner warn">Test mode: data is held in memory and lost on restart.</div><% } %>
+<% if (flash) { %><div class="banner <%= flash.type %>"><%= flash.text %></div><% } %>

@@ -1,0 +1,25 @@
+<%- include('partials/header', { title: 'Items' }) %>
+<div class="head-row"><h1>Items</h1><a class="btn" href="/items/new">+ Personal item</a></div>
+<form method="get" class="filters">
+  <input name="q" value="<%= q %>" placeholder="Search description, brand, size, #">
+  <select name="status"><option value="">Any status</option><% LISTS.itemStatus.forEach(s => { %><option <%= filter.status === s ? 'selected' : '' %>><%= s %></option><% }) %></select>
+  <select name="ownership"><option value="">Business &amp; personal</option><% LISTS.ownership.forEach(s => { %><option <%= filter.ownership === s ? 'selected' : '' %>><%= s %></option><% }) %></select>
+  <button type="submit" class="btn">Filter</button>
+</form>
+<% if (!items.length) { %><p>No items match.</p><% } else { %>
+<table class="list">
+  <thead><tr><th>#</th><th>Item</th><th>Type</th><th>Status</th><th class="num">Cost</th></tr></thead>
+  <tbody>
+  <% items.forEach(i => { %>
+    <tr>
+      <td><a href="/items/<%= i.ItemID %>">#<%= i.ItemID %></a></td>
+      <td><a href="/items/<%= i.ItemID %>"><%= i.Description %></a><div class="muted small"><%= [i.Brand, i.Size, i.Condition].filter(Boolean).join(' · ') %></div></td>
+      <td><%= i.Ownership %></td>
+      <td><span class="pill <%= i.Status.replace(/\s/g,'').toLowerCase() %>"><%= i.Status %><%= i.ListedOn && i.Status !== 'In stock' ? ' · ' + i.ListedOn : '' %></span></td>
+      <td class="num"><%= i.Ownership === 'Business' ? money(i.CostAllocated) : '—' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+<%- include('partials/footer') %>

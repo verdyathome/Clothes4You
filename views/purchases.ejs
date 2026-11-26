@@ -1,0 +1,13 @@
+<%- include('partials/header', { title: 'Purchases' }) %>
+<div class="head-row"><h1>Stock purchases</h1><a class="btn primary" href="/purchases/new">+ New purchase</a></div>
+<% if (!purchases.length) { %><p>No purchases yet.</p><% } else { %>
+<table class="list">
+  <thead><tr><th>#</th><th>Date</th><th>From</th><th>Items</th><th class="num">Total</th><th>Tax yr</th></tr></thead>
+  <tbody>
+  <% purchases.forEach(p => { %>
+    <tr><td><a href="/purchases/<%= p.PurchaseID %>">#<%= p.PurchaseID %></a></td><td><%= ukDate(p.PurchaseDate) %></td><td><%= p.Supplier || p.SourceType %></td><td><%= p.ItemCount %></td><td class="num"><%= money(p.TotalCost) %></td><td><%= p.TaxYear %></td></tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+<%- include('partials/footer') %>

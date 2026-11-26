@@ -1,0 +1,32 @@
+<%- include('partials/header', { title: 'Record sale' }) %>
+<h1>Record a sale</h1>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<% if (!items.length) { %>
+  <p>There are no unsold items. Add a <a href="/purchases/new">stock purchase</a> or a <a href="/items/new">personal item</a> first.</p>
+<% } else { %>
+<form method="post" action="/sales" class="card">
+  <label>Item *
+    <select name="ItemID" required id="sale-item">
+      <option value="">Choose item…</option>
+      <% items.forEach(i => { %>
+        <option value="<%= i.ItemID %>" data-listed="<%= i.ListedOn %>" <%= String(form.ItemID) === String(i.ItemID) ? 'selected' : '' %>>#<%= i.ItemID %> <%= i.Description %><%= i.Brand ? ' · ' + i.Brand : '' %><%= i.Size ? ' · ' + i.Size : '' %><%= i.Ownership === 'Personal' ? ' (personal)' : '' %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="fields">
+    <label>Sale date * <input type="date" name="SaleDate" value="<%= form.SaleDate || '' %>" required></label>
+    <label>Sold on *
+      <select name="Channel" id="sale-channel"><% LISTS.channels.forEach(c => { %><option <%= form.Channel === c ? 'selected' : '' %>><%= c %></option><% }) %></select>
+    </label>
+    <label>Order ref <input name="OrderRef" value="<%= form.OrderRef || '' %>"></label>
+    <label>Sale price (£) * <input name="SalePrice" inputmode="decimal" value="<%= form.SalePrice || '' %>" required></label>
+    <label>Postage charged to buyer (£) <input name="BuyerPostage" inputmode="decimal" value="<%= form.BuyerPostage || '' %>" placeholder="0"></label>
+    <label>Platform fee (£) <input name="PlatformFee" inputmode="decimal" value="<%= form.PlatformFee || '' %>" placeholder="0"></label>
+    <label>Postage she paid (£) <input name="PostageCost" inputmode="decimal" value="<%= form.PostageCost || '' %>" placeholder="0"></label>
+  </div>
+  <p class="muted small">Vinted: the buyer usually pays postage and fees to Vinted directly, so leave those at 0 unless she paid them. eBay: enter the final value fee shown on the order.</p>
+  <label>Notes <textarea name="Notes" rows="2"><%= form.Notes || '' %></textarea></label>
+  <button type="submit" class="primary big">Save sale</button>
+</form>
+<% } %>
+<%- include('partials/footer') %>

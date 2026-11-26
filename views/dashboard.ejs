@@ -1,0 +1,65 @@
+<%- include('partials/header', { title: 'Dashboard' }) %>
+<div class="head-row">
+  <h1>Tax year <%= d.taxYear %></h1>
+  <form method="get" class="inline">
+    <select name="ty" onchange="this.form.submit()">
+      <% years.forEach(y => { %><option <%= y === d.taxYear ? 'selected' : '' %>><%= y %></option><% }) %>
+    </select>
+  </form>
+</div>
+<p class="muted"><%= ukDate(d.range.start) %> to <%= ukDate(d.range.end) %> · business sales only · cash basis</p>
+
+<div class="actions">
+  <a class="btn primary" href="/sales/new">+ Record a sale</a>
+  <a class="btn" href="/purchases/new">+ Stock purchase</a>
+  <a class="btn" href="/items/new">+ Personal item</a>
+</div>
+
+<div class="tiles">
+  <div class="tile"><span>Turnover</span><strong><%= money(d.turnover) %></strong><small><%= d.salesCount %> sale(s) incl. postage charged</small></div>
+  <div class="tile"><span>Stock bought</span><strong><%= money(d.stockPurchases) %></strong><small>paid this tax year</small></div>
+  <div class="tile"><span>Fees + postage</span><strong><%= money(d.platformFees + d.postageCosts) %></strong><small>on business sales</small></div>
+  <div class="tile"><span>Estimated profit</span><strong><%= money(d.estimatedProfit) %></strong><small>before other expenses</small></div>
+</div>
+
+<div class="grid2">
+  <section class="card">
+    <h2>Self Assessment (SA103) so far</h2>
+    <table class="kv">
+      <tr><td>Turnover</td><td><%= money(d.turnover) %></td></tr>
+      <tr><td>Cost of goods bought for resale</td><td><%= money(d.stockPurchases) %></td></tr>
+      <tr><td>Platform fees</td><td><%= money(d.platformFees) %></td></tr>
+      <tr><td>Postage &amp; delivery</td><td><%= money(d.postageCosts) %></td></tr>
+      <tr class="total"><td>Profit before other expenses</td><td><%= money(d.estimatedProfit) %></td></tr>
+    </table>
+    <p class="muted small">Other expenses (packaging, mileage, phone etc.) come in a later version. Check figures with an accountant before filing.</p>
+  </section>
+
+  <section class="card">
+    <h2>Stock &amp; item profit</h2>
+    <table class="kv">
+      <tr><td>Unsold business items</td><td><%= d.unsoldCount %></td></tr>
+      <tr><td>Unsold stock at cost</td><td><%= money(d.unsoldValue) %></td></tr>
+      <tr><td>Cost of items sold this year</td><td><%= money(d.costOfItemsSold) %></td></tr>
+      <tr><td>Sale price minus item cost</td><td><%= money(d.grossItemProfit) %></td></tr>
+    </table>
+    <% if (d.personalSalesCount) { %><p class="muted small"><%= d.personalSalesCount %> personal item sale(s) this tax year are excluded from the figures above.</p><% } %>
+  </section>
+</div>
+
+<section class="card">
+  <h2>Platform reporting check — calendar year <%= d.calYear %></h2>
+  <p class="muted small">Vinted and eBay report sellers to HMRC per calendar year once they reach 30 sales or about £1,700, <em>including personal items</em>. These totals should line up with what each platform reports.</p>
+  <% const names = Object.keys(d.platforms); %>
+  <% if (!names.length) { %><p>No sales yet this calendar year.</p><% } else { %>
+  <table class="list">
+    <thead><tr><th>Platform</th><th>Sales</th><th>Gross</th><th>Business</th><th>Personal</th></tr></thead>
+    <tbody>
+    <% names.forEach(n => { const p = d.platforms[n]; %>
+      <tr class="<%= p.count >= 30 || p.gross >= 1700 ? 'flag' : '' %>"><td><%= n %></td><td><%= p.count %></td><td><%= money(p.gross) %></td><td><%= money(p.business) %></td><td><%= money(p.personal) %></td></tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</section>
+<%- include('partials/footer') %>
