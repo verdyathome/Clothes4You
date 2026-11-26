@@ -114,4 +114,29 @@ async function update(table, filter, fields) {
   return json.RecordsAffected ?? 0;
 }
 
-module.exports = { select, insert, update, name: 'caspio' };
+// ---------- Attachment fields ----------
+// REST v3: PUT/GET /tables/{table}/attachments/{field}/{PK_ID}
+async function uploadAttachment(table, field, pkId, { buffer, filename, mimetype }) {
+  const form = new FormData();
+  form.append('File', new Blob([buffer], { type: mimetype || 'application/octet-stream' }), filename);
+  const res = await fetch(`${REST_URL}/tables/${table}/attachments/${field}/${Number(pkId)}`, {
+    method: 'PUT',
+    headers: { Authorization: `Bearer ${await getToken()}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error(`Caspio attachment upload failed: ${res.status} ${await res.text()}`);
+}
+
+async function downloadAttachment(table, field, pkId) {
+  const res = await fetch(`${REST_URL}/tables/${table}/attachments/${field}/${Number(pkId)}`, {
+    headers: { Authorization: `Bearer ${await getToken()}` },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Caspio attachment download failed: ${res.status} ${await res.text()}`);
+  return {
+    buffer: Buffer.from(await res.arrayBuffer()),
+    contentType: res.headers.get('content-type') || 'application/octet-stream',
+  };
+}
+
+module.exports = { select, insert, update, uploadAttachment, downloadAttachment, name: 'caspio' };

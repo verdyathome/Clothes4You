@@ -1,0 +1,29 @@
+<%- include('partials/header', { title: 'Expense #' + e.ExpenseID }) %>
+<h1>Expense #<%= e.ExpenseID %></h1>
+<section class="card">
+  <table class="kv">
+    <tr><td>Date paid</td><td><%= ukDate(e.ExpenseDate) %> (tax year <%= e.TaxYear %>)</td></tr>
+    <tr><td>Description</td><td><%= e.Description %></td></tr>
+    <tr><td>Type</td><td><%= e.ExpenseType %></td></tr>
+    <tr><td>SA103 category</td><td><%= e.SA103Category %></td></tr>
+    <% if (e.Miles) { %><tr><td>Miles</td><td><%= e.Miles %></td></tr><% } %>
+    <% if (e.Supplier) { %><tr><td>Supplier</td><td><%= e.Supplier %></td></tr><% } %>
+    <% if (e.PaymentMethod) { %><tr><td>Paid by</td><td><%= e.PaymentMethod %></td></tr><% } %>
+    <tr class="total"><td>Amount</td><td><%= money(e.Amount) %></td></tr>
+    <% if (e.Notes) { %><tr><td>Notes</td><td><%= e.Notes %></td></tr><% } %>
+  </table>
+</section>
+<section class="card">
+  <h2>Receipt</h2>
+  <% if (e.Receipt) { %>
+    <p><a class="btn" href="/expenses/<%= e.ExpenseID %>/receipt" target="_blank" rel="noopener">View receipt</a></p>
+  <% } else { %>
+    <p class="muted">No receipt stored yet.</p>
+  <% } %>
+  <form method="post" action="/expenses/<%= e.ExpenseID %>/receipt" enctype="multipart/form-data" class="fields">
+    <label><%= e.Receipt ? 'Replace receipt' : 'Add receipt' %> <input type="file" name="receipt" accept="image/*,application/pdf" capture="environment" required></label>
+    <button type="submit" class="btn">Upload</button>
+  </form>
+</section>
+<p><a href="/expenses?ty=<%= e.TaxYear %>">← All expenses <%= e.TaxYear %></a></p>
+<%- include('partials/footer') %>

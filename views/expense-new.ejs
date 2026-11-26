@@ -1,0 +1,29 @@
+<%- include('partials/header', { title: 'New expense' }) %>
+<h1>Add an expense</h1>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<form method="post" action="/expenses" enctype="multipart/form-data" class="card" id="expense-form">
+  <div class="fields">
+    <label>Date paid * <input type="date" name="ExpenseDate" value="<%= form.ExpenseDate || '' %>" required></label>
+    <label>What for? *
+      <select name="ExpenseType" id="expense-type" required>
+        <option value="">Choose…</option>
+        <% types.forEach(t => { %><option value="<%= t.type %>" data-cat="<%= t.cat %>" data-mileage="<%= t.mileage ? 1 : '' %>" <%= form.ExpenseType === t.type ? 'selected' : '' %>><%= t.type %></option><% }) %>
+      </select>
+    </label>
+    <label>Description * <input name="Description" value="<%= form.Description || '' %>" placeholder="e.g. 100 grey mailing bags" required></label>
+    <label class="money-field">Amount (£) * <input name="Amount" inputmode="decimal" value="<%= form.Amount || '' %>"></label>
+    <label class="miles-field" hidden>Business miles * <input name="Miles" inputmode="decimal" value="<%= form.Miles || '' %>" data-rate="<%= rate %>"></label>
+    <label class="money-field">Supplier <input name="Supplier" value="<%= form.Supplier || '' %>" placeholder="e.g. Amazon, Post Office"></label>
+    <label class="money-field">Paid by
+      <select name="PaymentMethod"><% LISTS.paymentMethods.forEach(s => { %><option <%= form.PaymentMethod === s ? 'selected' : '' %>><%= s %></option><% }) %></select>
+    </label>
+  </div>
+  <p class="muted small" id="cat-hint"></p>
+  <label>Receipt photo or PDF <input type="file" name="receipt" accept="image/*,application/pdf" capture="environment"></label>
+  <label>Notes <textarea name="Notes" rows="2"><%= form.Notes || '' %></textarea></label>
+  <div class="actions">
+    <button type="submit" class="primary">Save expense</button>
+    <button type="submit" name="again" value="1" class="btn">Save and add another</button>
+  </div>
+</form>
+<%- include('partials/footer') %>

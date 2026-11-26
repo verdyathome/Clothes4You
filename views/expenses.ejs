@@ -1,0 +1,27 @@
+<%- include('partials/header', { title: 'Expenses' }) %>
+<div class="head-row">
+  <h1>Expenses <%= ty %></h1>
+  <form method="get" class="inline">
+    <select name="ty" onchange="this.form.submit()"><% years.forEach(y => { %><option <%= y === ty ? 'selected' : '' %>><%= y %></option><% }) %></select>
+  </form>
+  <a class="btn primary" href="/expenses/new">+ Expense</a>
+</div>
+<p class="muted small">Running costs of the business. Stock bought to resell goes in <a href="/purchases/new">Stock purchase</a>; fees and postage on a sale go on the sale itself.</p>
+<% if (!expenses.length) { %><p>No expenses in this tax year yet.</p><% } else { %>
+<table class="list">
+  <thead><tr><th>#</th><th>Date</th><th>Description</th><th>Type</th><th>Receipt</th><th class="num">Amount</th></tr></thead>
+  <tbody>
+  <% expenses.forEach(e => { %>
+    <tr>
+      <td><a href="/expenses/<%= e.ExpenseID %>">#<%= e.ExpenseID %></a></td><td><%= ukDate(e.ExpenseDate) %></td>
+      <td><a href="/expenses/<%= e.ExpenseID %>"><%= e.Description %></a><div class="muted small"><%= e.SA103Category %></div></td>
+      <td><%= e.ExpenseType %><%= e.Miles ? ' · ' + e.Miles + ' mi' : '' %></td>
+      <td><%= e.Receipt ? '📎' : '' %></td>
+      <td class="num"><%= money(e.Amount) %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+  <tfoot><tr><td colspan="5"><strong>Total</strong></td><td class="num"><strong><%= money(expenses.reduce((a, e) => a + e.Amount, 0)) %></strong></td></tr></tfoot>
+</table>
+<% } %>
+<%- include('partials/footer') %>

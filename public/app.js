@@ -41,6 +41,39 @@
     updateHint();
   }
 
+  // Expense form: switch between amount and mileage, show SA103 category.
+  const typeSel = document.getElementById('expense-type');
+  if (typeSel) {
+    const hint = document.getElementById('cat-hint');
+    const milesInput = document.querySelector('.miles-field input');
+    const showType = () => {
+      const opt = typeSel.selectedOptions[0];
+      const mileage = !!(opt && opt.dataset.mileage);
+      document.querySelectorAll('.money-field').forEach((el) => (el.hidden = mileage));
+      document.querySelector('.miles-field').hidden = !mileage;
+      const miles = Number(milesInput.value) || 0;
+      hint.textContent = opt && opt.dataset.cat
+        ? `SA103 category: ${opt.dataset.cat}${mileage && miles ? ` · ${miles} miles × £${Number(milesInput.dataset.rate).toFixed(2)} = £${(miles * milesInput.dataset.rate).toFixed(2)}` : ''}`
+        : '';
+    };
+    typeSel.addEventListener('change', showType);
+    milesInput.addEventListener('input', showType);
+    showType();
+  }
+
+  // eBay import: stop the same item being picked for two orders.
+  const picks = [...document.querySelectorAll('.item-pick')];
+  if (picks.length) {
+    const sync = () => {
+      const chosen = new Set(picks.map((p) => p.value).filter(Boolean));
+      picks.forEach((p) => [...p.options].forEach((o) => {
+        o.disabled = !!o.value && o.value !== p.value && chosen.has(o.value);
+      }));
+    };
+    picks.forEach((p) => p.addEventListener('change', sync));
+    sync();
+  }
+
   // Sale form: default "Sold on" to where the item is listed.
   const item = document.getElementById('sale-item');
   const channel = document.getElementById('sale-channel');

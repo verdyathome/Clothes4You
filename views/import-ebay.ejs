@@ -1,0 +1,16 @@
+<%- include('partials/header', { title: 'Import eBay sales' }) %>
+<h1>Import eBay sales</h1>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<section class="card">
+  <h2>1. Download the report from eBay</h2>
+  <p><strong>Best:</strong> eBay → <em>Payments</em> → <em>Reports</em> → <em>Transaction report</em>, choose the date range, download as CSV. This includes fees and any postage labels bought through eBay.</p>
+  <p class="muted">Also works: Seller Hub → <em>Orders</em> → <em>Download report</em> (no fees — add them afterwards if needed).</p>
+  <p class="muted small">Tip: put the portal item number (e.g. <code>123</code> or <code>#123</code>) in the eBay listing's <em>Custom label (SKU)</em> and items will be matched automatically.</p>
+</section>
+<form method="post" action="/import/ebay" enctype="multipart/form-data" class="card">
+  <h2>2. Upload it</h2>
+  <label>eBay CSV file <input type="file" name="report" accept=".csv,text/csv" required></label>
+  <button type="submit" class="primary">Check file</button>
+  <p class="muted small">Nothing is saved until you confirm on the next page. Orders already imported are skipped.</p>
+</form>
+<%- include('partials/footer') %>

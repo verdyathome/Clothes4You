@@ -17,21 +17,39 @@
   </table>
 </section>
 
-<% if (sale) { %>
+<% sales.forEach(sale => { %>
 <section class="card">
-  <h2>Sale #<%= sale.SaleID %></h2>
+  <div class="head-row"><h2>Sale #<%= sale.SaleID %></h2><% if (sale.Refunded) { %><span class="pill writtenoff">Refunded</span><% } %></div>
   <table class="kv">
     <tr><td>Date / where</td><td><%= ukDate(sale.SaleDate) %> · <%= sale.Channel %><%= sale.OrderRef ? ' · ' + sale.OrderRef : '' %></td></tr>
     <tr><td>Sale price</td><td><%= money(sale.SalePrice) %></td></tr>
     <tr><td>Postage charged to buyer</td><td><%= money(sale.BuyerPostage) %></td></tr>
     <tr><td>Platform fee</td><td><%= money(sale.PlatformFee) %></td></tr>
     <tr><td>Postage she paid</td><td><%= money(sale.PostageCost) %></td></tr>
-    <% if (item.Ownership === 'Business') { const profit = sale.SalePrice + sale.BuyerPostage - sale.PlatformFee - sale.PostageCost - sale.ItemCost; %>
-    <tr class="total"><td>Profit on this item</td><td><%= money(profit) %></td></tr>
+    <% if (sale.Refunded) { %>
+      <tr><td>Refund</td><td>−<%= money(sale.RefundAmount) %> on <%= ukDate(sale.RefundDate) %><%= sale.ItemReturned ? ' · item returned' : '' %></td></tr>
+    <% } %>
+    <% if (item.Ownership === 'Business') { const profit = sale.SalePrice + sale.BuyerPostage - sale.PlatformFee - sale.PostageCost - (sale.Refunded ? sale.RefundAmount : 0) - (sale.Refunded && sale.ItemReturned ? 0 : sale.ItemCost); %>
+    <tr class="total"><td>Profit on this sale</td><td><%= money(profit) %></td></tr>
     <% } %>
   </table>
+  <% if (!sale.Refunded) { %>
+  <details class="refund">
+    <summary>Record a refund</summary>
+    <form method="post" action="/sales/<%= sale.SaleID %>/refund" class="fields">
+      <label>Date refund paid <input type="date" name="RefundDate" value="<%= today %>" required></label>
+      <label>Amount refunded (£) <input name="RefundAmount" inputmode="decimal" value="<%= (sale.SalePrice + sale.BuyerPostage).toFixed(2) %>"></label>
+      <label>Item came back?
+        <select name="ItemReturned"><option value="yes">Yes — put back in stock</option><option value="no">No (partial refund / not returned)</option></select>
+      </label>
+      <button type="submit" class="btn">Save refund</button>
+    </form>
+  </details>
+  <% } %>
 </section>
-<% } else if (item.Status !== 'Written off') { %>
+<% }) %>
+
+<% if (item.Status === 'In stock' || item.Status === 'Listed') { %>
 <div class="actions">
   <a class="btn primary" href="/sales/new?item=<%= item.ItemID %>">Record sale</a>
 </div>
@@ -49,7 +67,7 @@
     <button type="submit" class="btn">Update</button>
   </form>
 </section>
-<% } else { %>
+<% } else if (item.Status === 'Written off') { %>
 <section class="card">
   <form method="post" action="/items/<%= item.ItemID %>/status"><input type="hidden" name="Status" value="In stock"><button class="btn">Put back in stock</button></form>
 </section>
