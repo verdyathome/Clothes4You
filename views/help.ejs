@@ -1,0 +1,19 @@
+<%- include('partials/header', { title: guide.title }) %>
+<p class="muted small"><a href="/help">Help</a> › <%= guide.title %></p>
+<div class="help-layout">
+  <nav class="help-toc card" aria-label="All guides">
+    <ol>
+      <% guides.forEach(g => { %>
+        <li><a href="/help/<%= g.slug %>" class="<%= g.slug === guide.slug ? 'on' : '' %>"<%- g.slug === guide.slug ? ' aria-current="page"' : '' %>><%= g.title %></a></li>
+      <% }) %>
+    </ol>
+  </nav>
+  <article class="guide card">
+    <%- guide.html %>
+    <nav class="guide-nav" aria-label="Next and previous guide">
+      <% if (prev) { %><a class="btn" href="/help/<%= prev.slug %>">← <%= prev.title %></a><% } else { %><a class="btn" href="/help">← All guides</a><% } %>
+      <% if (next) { %><a class="btn" href="/help/<%= next.slug %>"><%= next.title %> →</a><% } %>
+    </nav>
+  </article>
+</div>
+<%- include('partials/footer') %>

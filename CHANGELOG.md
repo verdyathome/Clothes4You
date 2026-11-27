@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.0 — 2026-11-27
+- **In-app Help**: 11 illustrated guides (getting started, stock purchases, personal items, sales, refunds, expenses, eBay import, tax years & SA103, platform check, Excel download, settings) with search
+- Help in the ☰ menu on phones and a **? Help** button beside Settings on desktop
+- "How does this work?" link on each main page opens the matching guide
+- Guides are Markdown files in `help/` — edit the wording on GitHub; screenshots live in `public/guide-img/`
+- Fix: the platform check table on the dashboard was cut off on phones; it now scrolls sideways
+
 ## 0.3.3 — 2026-11-27
 - After an eBay import the app goes to the Dashboard, opened on the tax year of the imported sales, with the "eBay import complete" banner
 - Buttons on every save form are disabled as soon as they're pressed ("Importing… please wait" on the import), so a double-tap can't submit twice

@@ -1,0 +1,26 @@
+<%- include('partials/header', { title: 'Help' }) %>
+<h1>Help</h1>
+<p class="muted">Short guides to every part of the app. Tap a guide to read it.</p>
+<form method="get" action="/help" class="help-search" role="search">
+  <label class="sr-only" for="help-q">Search the guides</label>
+  <input id="help-q" name="q" value="<%= q %>" placeholder="Search, e.g. refund, mileage, eBay" type="search">
+  <button type="submit" class="btn">Search</button>
+</form>
+
+<% if (results) { %>
+  <h2><%= results.length %> result<%= results.length === 1 ? '' : 's' %> for “<%= q %>”</h2>
+  <% if (!results.length) { %><p>No guide mentions that. Try a shorter word, or browse the list below.</p><% } %>
+  <ul class="guide-list">
+    <% results.forEach(g => { %>
+      <li><a href="/help/<%= g.slug %>"><strong><%= g.title %></strong><span><%= g.snippet %></span></a></li>
+    <% }) %>
+  </ul>
+  <h2 style="margin-top: 28px">All guides</h2>
+<% } %>
+
+<ol class="guide-list">
+  <% guides.forEach((g, i) => { %>
+    <li><a href="/help/<%= g.slug %>"><strong><%= i + 1 %>. <%= g.title %></strong><span><%= g.summary %></span></a></li>
+  <% }) %>
+</ol>
+<%- include('partials/footer') %>
