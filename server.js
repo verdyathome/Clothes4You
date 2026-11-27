@@ -8,6 +8,8 @@ const svc = require('./src/services');
 const db = require('./src/db');
 const ebay = require('./src/ebay');
 const { buildWorkbook } = require('./src/export');
+const settingsSvc = require('./src/settings');
+const crypto = require('crypto');
 const { checkLogin, requireLogin, normUser } = require('./src/auth');
 const { money, today, isDate, taxYearOf, ukDate } = require('./src/util');
 
@@ -40,6 +42,7 @@ const receiptUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => cb(null, /^image\/|^application\/pdf$/.test(file.mimetype)),
 });
+const iconUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024, files: 1 } });
 const csvUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 } });
 
 // Shared template helpers + one-shot flash messages
@@ -49,6 +52,27 @@ app.use((req, res, next) => {
   req.session.flash = null;
   req.flash = (type, text) => (req.session.flash = { type, text });
   next();
+});
+
+// Name, colours and favicon from Settings, available to every page (login included)
+app.use(async (req, res, next) => {
+  try {
+    const s = await settingsSvc.load();
+    res.locals.settings = s;
+    res.locals.themeCss = settingsSvc.themeCss(s);
+    res.locals.faviconVersion = s.Favicon ? crypto.createHash('sha1').update(s.Favicon).digest('hex').slice(0, 8) : '';
+    next();
+  } catch (e) { next(e); }
+});
+
+// Public: browsers fetch the icon before anyone logs in
+app.get(['/favicon', '/favicon.ico', '/apple-touch-icon.png'], async (req, res) => {
+  const s = res.locals.settings;
+  if (!s.Favicon) return res.status(404).end();
+  res.setHeader('Content-Type', s.FaviconType || 'image/png');
+  res.setHeader('Cache-Control', req.query.v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.send(Buffer.from(s.Favicon, 'base64'));
 });
 
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
@@ -277,6 +301,35 @@ app.get('/expenses/:id/receipt', wrap(async (req, res) => {
   res.setHeader('Content-Disposition', `${safeType === 'application/octet-stream' ? 'attachment' : 'inline'}; filename="${file.filename.replace(/[^\w.\- ]/g, '_')}"`);
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.send(file.buffer);
+}));
+
+// ---------- Settings ----------
+function renderSettings(res, form, error, status = 200) {
+  const s = res.locals.settings;
+  res.status(status).render('settings', {
+    form, error, warnings: settingsSvc.warnings({ ...s, ...form }),
+    colours: settingsSvc.COLOURS, presets: settingsSvc.PRESETS,
+  });
+}
+app.get('/settings', (req, res) => renderSettings(res, { ...res.locals.settings }, null));
+app.post('/settings', (req, res, next) => iconUpload.single('favicon')(req, res, (err) => {
+  if (err) return renderSettings(res, { ...res.locals.settings, ...(req.body || {}) }, 'The icon file is too large — please use one under 45 KB.', 400);
+  next();
+}), wrap(async (req, res) => {
+  try {
+    const saved = await settingsSvc.save(req.body, fileFrom(req.file));
+    const w = settingsSvc.warnings(saved);
+    req.flash(w.length ? 'error' : 'ok', w.length ? `Settings saved, but: ${w.join(' ')}` : 'Settings saved.');
+    res.redirect('/settings');
+  } catch (e) {
+    if (!isUserError(e)) throw e;
+    renderSettings(res, { ...res.locals.settings, ...req.body }, e.message, 400);
+  }
+}));
+app.post('/settings/reset', wrap(async (req, res) => {
+  await settingsSvc.reset();
+  req.flash('ok', 'Name and colours reset to the defaults.');
+  res.redirect('/settings');
 }));
 
 // ---------- Errors ----------

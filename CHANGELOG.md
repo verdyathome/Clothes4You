@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0 — 2026-11-27
+**Needs Caspio:** new table `CSP_Settings` (see SETUP.md).
+- Settings page: app name, colour scheme (buttons, button text, page background, panels, header, text) with six presets, live preview and readability warnings, app icon/favicon upload (also used for the iPhone home-screen icon), reset to defaults
+- Phones: hamburger menu at top right holding "Signed in as…", Settings and Log out; desktop shows them inline on the right
+- Muted text, borders and the phone page-row background are worked out from the chosen colours, so every scheme stays consistent
+
 ## 0.2.2 — 2026-11-27
 - Phone layout: title and log out on one row, the five pages in an equal-width row underneath (current page highlighted)
 - Phone dashboard: full-width "Record a sale" button, other actions share a row, figure tiles in a 2×2 grid
