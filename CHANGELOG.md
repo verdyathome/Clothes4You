@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — 2026-11-27
+- eBay import: "Create new business item" / "Create new personal item" on each order, for past sales not yet in the app — the item is named from the eBay title and the sale imported in one step
+- Business items can be given what was paid and when: recorded as a one-item stock purchase so the cost counts in that tax year
+- "Create business items" / "Create personal items" buttons fill every unmatched order at once
+- Clearer message when nothing is selected
+- **Fix:** on phones the import preview hid the item drop-down column, so nothing could be matched; orders now show as cards with the drop-down visible
+
 ## 0.3.1 — 2026-11-27
 - Desktop: Settings is now a clear button with a gear icon (highlighted when you're on the Settings page)
 - Phone layout (title row + page row + ☰ menu) now also used for windows up to 760px wide, e.g. iPad portrait or a narrow laptop window, where the page links used to wrap

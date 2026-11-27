@@ -244,13 +244,15 @@ app.post('/import/ebay/confirm', wrap(async (req, res) => {
   const rows = Object.values(req.body.rows || {}).map((r) => ({
     ItemID: r.ItemID, OrderRef: r.OrderRef, SaleDate: r.SaleDate, SalePrice: r.SalePrice,
     BuyerPostage: r.BuyerPostage, PlatformFee: r.PlatformFee, PostageCost: r.PostageCost,
+    Title: r.Title, NewCost: r.NewCost, NewCostDate: r.NewCostDate,
   })).filter((r) => r.ItemID && isDate(r.SaleDate));
   if (!rows.length) {
-    req.flash('error', 'No orders were matched to items, so nothing was imported.');
+    req.flash('error', 'Nothing was imported — every order was left as "Don\'t import". Choose an existing item or "Create new item" for each order you want to bring in.');
     return res.redirect('/import/ebay');
   }
   const { done, errors } = await svc.importEbay(rows, req.session.user);
-  req.flash(errors.length ? 'error' : 'ok', `Imported ${done.length} eBay sale(s).${errors.length ? ' ' + errors.join(' ') : ''}`);
+  const created = done.filter((d) => d.createdItem).length;
+  req.flash(errors.length ? 'error' : 'ok', `Imported ${done.length} eBay sale(s)${created ? `, creating ${created} new item(s)` : ''}.${errors.length ? ' ' + errors.join(' ') : ''}`);
   res.redirect('/sales');
 }));
 

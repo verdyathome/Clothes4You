@@ -1,20 +1,29 @@
 <%- include('partials/header', { title: 'Check eBay import' }) %>
 <h1>Check eBay import</h1>
-<p class="muted">Choose the portal item for each order. Orders left as "Don't import" are skipped. Each item can only be used once.</p>
+<p class="muted">For each order, choose the item it was, or <strong>Create new item</strong> for past sales that aren't in the app yet. Orders left as "Don't import" are skipped. Each existing item can only be used once.</p>
+<div class="card bulk-create">
+  <strong>Past sales not in the app?</strong>
+  <span class="muted small">Set every order that has no item chosen to:</span>
+  <div class="actions" style="margin: 6px 0 0">
+    <button type="button" class="btn" data-bulk="new-business">Create business items</button>
+    <button type="button" class="btn" data-bulk="new-personal">Create personal items</button>
+  </div>
+  <p class="muted small" style="margin: 8px 0 0">New items are named from the eBay title. For a business item you can add what she paid for it and when. That's recorded as a stock purchase, so it counts as a cost in the tax year it was paid. Leave the cost blank if it was part of a bundle you'll record separately.</p>
+</div>
 <% if (skipped.refunds || skipped.otherFees || skipped.other) { %>
   <div class="banner warn">
     Not imported: <%= skipped.refunds %> refund line(s) — record refunds on the sale instead; <%= skipped.otherFees %> other fee line(s) (e.g. promoted listings) — add as an expense if needed<%= skipped.other ? '; ' + skipped.other + ' other line(s)' : '' %>.
   </div>
 <% } %>
 <form method="post" action="/import/ebay/confirm">
-  <table class="list">
+  <table class="list import-table">
     <thead><tr><th>Date</th><th>eBay order</th><th class="num">Price</th><th class="num">Postage in</th><th class="num">Fees</th><th class="num">Label</th><th>Portal item</th></tr></thead>
     <tbody>
     <% rows.forEach((r, i) => { %>
       <tr class="<%= r.duplicate ? 'personal' : '' %>">
-        <td><%= ukDate(r.date) || '?' %></td>
+        <td class="imp-date"><%= ukDate(r.date) || '?' %></td>
         <td><%= r.title %><div class="muted small"><%= r.orderRef %><%= r.customLabel ? ' · SKU ' + r.customLabel : '' %><%= r.quantity > 1 ? ' · qty ' + r.quantity : '' %><%= r.extraLines ? ' · +' + r.extraLines + ' more line(s)' : '' %></div></td>
-        <td class="num"><%= money(r.price) %></td><td class="num"><%= money(r.buyerPostage) %></td><td class="num"><%= money(r.fee) %></td><td class="num"><%= money(r.postageCost) %></td>
+        <td class="num" data-label="Price"><%= money(r.price) %></td><td class="num" data-label="Postage in"><%= money(r.buyerPostage) %></td><td class="num" data-label="Fees"><%= money(r.fee) %></td><td class="num" data-label="Label"><%= money(r.postageCost) %></td>
         <td>
           <% if (r.duplicate) { %>
             <span class="muted">Already imported</span>
@@ -27,10 +36,17 @@
             <input type="hidden" name="rows[<%= i %>][BuyerPostage]" value="<%= r.buyerPostage %>">
             <input type="hidden" name="rows[<%= i %>][PlatformFee]" value="<%= r.fee %>">
             <input type="hidden" name="rows[<%= i %>][PostageCost]" value="<%= r.postageCost %>">
-            <select name="rows[<%= i %>][ItemID]" class="item-pick">
+            <input type="hidden" name="rows[<%= i %>][Title]" value="<%= r.title %>">
+            <select name="rows[<%= i %>][ItemID]" class="item-pick" aria-label="Item for eBay order <%= r.orderRef %>">
               <option value="">Don't import</option>
+              <option value="new-business">➕ Create new business item</option>
+              <option value="new-personal">➕ Create new personal item</option>
               <% available.forEach(it => { %><option value="<%= it.ItemID %>" <%= r.itemId === it.ItemID ? 'selected' : '' %>>#<%= it.ItemID %> <%= it.Description %><%= it.Size ? ' · ' + it.Size : '' %><%= it.Ownership === 'Personal' ? ' (personal)' : '' %></option><% }) %>
             </select>
+            <div class="new-cost" hidden>
+              <label>Cost £ <input name="rows[<%= i %>][NewCost]" inputmode="decimal" placeholder="optional"></label>
+              <label>Date paid <input type="date" name="rows[<%= i %>][NewCostDate]" max="<%= r.date %>"></label>
+            </div>
           <% } %>
         </td>
       </tr>

@@ -106,16 +106,26 @@
     showType();
   }
 
-  // eBay import: stop the same item being picked for two orders.
+  // eBay import: stop the same existing item being picked for two orders;
+  // show cost fields for "Create new business item"; bulk-fill unmatched rows.
   const picks = [...document.querySelectorAll('.item-pick')];
   if (picks.length) {
+    const isNew = (v) => v === 'new-business' || v === 'new-personal';
     const sync = () => {
-      const chosen = new Set(picks.map((p) => p.value).filter(Boolean));
-      picks.forEach((p) => [...p.options].forEach((o) => {
-        o.disabled = !!o.value && o.value !== p.value && chosen.has(o.value);
-      }));
+      const chosen = new Set(picks.map((p) => p.value).filter((v) => v && !isNew(v)));
+      picks.forEach((p) => {
+        [...p.options].forEach((o) => {
+          o.disabled = !!o.value && !isNew(o.value) && o.value !== p.value && chosen.has(o.value);
+        });
+        const cost = p.parentElement.querySelector('.new-cost');
+        if (cost) cost.hidden = p.value !== 'new-business';
+      });
     };
     picks.forEach((p) => p.addEventListener('change', sync));
+    document.querySelectorAll('[data-bulk]').forEach((btn) => btn.addEventListener('click', () => {
+      picks.forEach((p) => { if (!p.value) p.value = btn.dataset.bulk; });
+      sync();
+    }));
     sync();
   }
 
