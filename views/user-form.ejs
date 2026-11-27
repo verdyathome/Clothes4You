@@ -1,0 +1,43 @@
+<%- include('partials/header', { title: isNew ? 'Add user' : 'Edit user' }) %>
+<p class="muted small"><a href="/users">Users</a> › <%= isNew ? 'Add user' : (u.DisplayName || u.Username) %></p>
+<h1><%= isNew ? 'Add a user' : 'Edit ' + (u.DisplayName || u.Username) %></h1>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<form method="post" action="<%= isNew ? '/users' : '/users/' + u.UserID %>" class="card" autocomplete="off">
+  <div class="fields">
+    <% if (isNew) { %>
+      <label>Username * <input name="Username" value="<%= u.Username || '' %>" autocapitalize="none" autocorrect="off" spellcheck="false" required maxlength="30" placeholder="e.g. kate"></label>
+    <% } else { %>
+      <label>Username <input value="<%= u.Username %>" disabled></label>
+    <% } %>
+    <label>Name shown in the app <input name="DisplayName" value="<%= u.DisplayName || '' %>" maxlength="60" placeholder="e.g. Kate"></label>
+    <label>Profile
+      <select name="Role">
+        <option value="User" <%= u.Role === 'User' ? 'selected' : '' %>>User: records sales, purchases, expenses</option>
+        <option value="Admin" <%= u.Role === 'Admin' ? 'selected' : '' %>>Admin: everything, plus users and Settings</option>
+      </select>
+    </label>
+    <% if (!isNew) { %>
+      <label>Status
+        <select name="Active">
+          <option value="1" <%= u.Active ? 'selected' : '' %>>Active: can log in</option>
+          <option value="0" <%= !u.Active ? 'selected' : '' %>>Disabled: can't log in</option>
+        </select>
+      </label>
+    <% } %>
+  </div>
+  <h2 style="margin-top: 10px"><%= isNew ? 'Password' : 'Set a new password' %></h2>
+  <p class="muted small"><%= isNew ? '' : 'Leave blank to keep the current password. ' %>At least <%= min %> characters. Passwords are stored scrambled: nobody, Admins included, can see them afterwards, so tell the person their password yourself.</p>
+  <div class="fields">
+    <label><%= isNew ? 'Password *' : 'New password' %> <input type="password" name="Password" autocomplete="new-password" minlength="<%= min %>" <%= isNew ? 'required' : '' %>></label>
+    <label>Type it again <input type="password" name="Password2" autocomplete="new-password" minlength="<%= min %>" <%= isNew ? 'required' : '' %>></label>
+  </div>
+  <div class="actions"><button type="submit" class="primary"><%= isNew ? 'Add user' : 'Save changes' %></button><a class="btn" href="/users">Cancel</a></div>
+</form>
+<% if (!isNew && u.Username !== me) { %>
+<form method="post" action="/users/<%= u.UserID %>/delete" class="card">
+  <h2>Delete user</h2>
+  <p class="muted small">Removes the login completely; they're signed out straight away. Their past sales, purchases and expenses are kept. To stop someone logging in for a while, set Status to <em>Disabled</em> instead.</p>
+  <button type="submit" class="btn" data-confirm="Tap again to delete <%= u.Username %>">Delete user</button>
+</form>
+<% } %>
+<%- include('partials/footer') %>

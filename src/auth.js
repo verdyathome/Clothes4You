@@ -1,42 +1,29 @@
-// Simple login using users defined in the USERS_JSON environment variable:
-//   USERS_JSON={"simon":"a-long-password","daughter":"another-long-password"}
-const crypto = require('crypto');
+// Sign-in checks. Accounts and roles live in src/users.js (Caspio table CSP_Users).
+const users = require('./users');
 
-// Usernames are matched ignoring capitals and spaces at either end, because
-// phone keyboards often capitalise the first letter or add a trailing space.
-const normUser = (u) => String(u || '').trim().toLowerCase();
-
-function loadUsers() {
+// Every signed-in page: re-check the account still exists, is active, and read its role.
+async function requireLogin(req, res, next) {
   try {
-    const raw = JSON.parse(process.env.USERS_JSON || '{}');
-    const users = {};
-    for (const [name, pass] of Object.entries(raw)) users[normUser(name)] = String(pass);
-    if (!Object.keys(users).length) console.warn('WARNING: USERS_JSON is empty — nobody can log in.');
-    else console.log(`Logins configured for: ${Object.keys(users).join(', ')}`);
-    return users;
-  } catch {
-    console.error('USERS_JSON is not valid JSON — nobody can log in. Expected e.g. {"simon":"pass1","kate":"pass2"}');
-    return {};
+    if (!req.session || !req.session.user) return res.redirect('/login');
+    const u = await users.current(req.session.user, req.session.legacyRole);
+    if (!u) {
+      req.session = null;
+      return res.redirect('/login');
+    }
+    req.user = u;
+    res.locals.user = u.Username;
+    res.locals.displayName = u.DisplayName || u.Username;
+    res.locals.isAdmin = u.Role === 'Admin';
+    res.locals.role = u.Role;
+    next();
+  } catch (e) {
+    next(e);
   }
 }
-const users = loadUsers();
 
-const hash = (s) => crypto.createHash('sha256').update(String(s)).digest();
-
-function checkLogin(username, password) {
-  username = normUser(username);
-  const expected = Object.prototype.hasOwnProperty.call(users, username) ? users[username] : null;
-  // Always compare to avoid leaking which usernames exist via timing.
-  const ok = crypto.timingSafeEqual(hash(password), hash(expected ?? crypto.randomBytes(16)));
-  return ok && expected !== null;
+function requireAdmin(req, res, next) {
+  if (req.user && req.user.Role === 'Admin') return next();
+  res.status(403).render('error', { message: 'Only an Admin can use this page.' });
 }
 
-function requireLogin(req, res, next) {
-  if (req.session && req.session.user) {
-    res.locals.user = req.session.user;
-    return next();
-  }
-  res.redirect('/login');
-}
-
-module.exports = { checkLogin, requireLogin, normUser };
+module.exports = { requireLogin, requireAdmin, normUser: users.normUser };

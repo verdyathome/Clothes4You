@@ -11,7 +11,8 @@ const { buildWorkbook } = require('./src/export');
 const settingsSvc = require('./src/settings');
 const help = require('./src/help');
 const crypto = require('crypto');
-const { checkLogin, requireLogin, normUser } = require('./src/auth');
+const { requireLogin, requireAdmin } = require('./src/auth');
+const usersSvc = require('./src/users');
 const { money, today, isDate, taxYearOf, ukDate } = require('./src/util');
 
 const app = express();
@@ -144,15 +145,18 @@ app.get('/login', (req, res) => {
   if (req.session.user) return res.redirect('/');
   res.render('login', { error: null });
 });
-app.post('/login', (req, res) => {
+app.post('/login', wrap(async (req, res) => {
   const { username = '', password = '' } = req.body;
-  if (checkLogin(username, password)) {
-    req.session.user = normUser(username);
-    return res.redirect('/');
+  const r = await usersSvc.login(username, password);
+  if (r.error) {
+    console.warn(`Failed login for username "${usersSvc.normUser(username).slice(0, 40)}"`);
+    return res.status(401).render('login', { error: r.error });
   }
-  console.warn(`Failed login for username "${normUser(username).slice(0, 40)}"`);
-  res.status(401).render('login', { error: 'Username or password not recognised.' });
-});
+  req.session.user = r.user.Username;
+  req.session.legacyRole = r.user.legacy ? r.user.Role : undefined;
+  if (r.migrated) req.flash('ok', `Welcome! Your login has been moved into the app's user list as ${r.migrated === 'Admin' ? 'an Admin' : 'a User'}.`);
+  res.redirect('/');
+}));
 app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
@@ -391,6 +395,67 @@ app.get('/help/:slug', (req, res) => {
   res.render('help', { guide: all[i], prev: all[i - 1] || null, next: all[i + 1] || null, guides: all });
 });
 
+// ---------- Users (Admin only) ----------
+app.get('/users', requireAdmin, wrap(async (req, res) => {
+  const ready = await usersSvc.tableReady();
+  res.render('users', { users: ready ? await usersSvc.list() : [], ready, me: req.user.Username });
+}));
+app.get('/users/new', requireAdmin, (req, res) => res.render('user-form', { u: { Role: 'User', Active: true }, isNew: true, error: null, min: usersSvc.MIN_PASSWORD }));
+app.post('/users', requireAdmin, wrap(async (req, res) => {
+  try {
+    const u = await usersSvc.create(req.body, req.user.Username);
+    req.flash('ok', `User "${u.Username}" added as ${u.Role}.`);
+    res.redirect('/users');
+  } catch (e) {
+    if (!isUserError(e)) throw e;
+    res.status(400).render('user-form', { u: { ...req.body, Active: true }, isNew: true, error: e.message, min: usersSvc.MIN_PASSWORD });
+  }
+}));
+app.get('/users/:id', requireAdmin, wrap(async (req, res) => {
+  const u = await usersSvc.getById(req.params.id);
+  if (!u) return res.status(404).render('error', { message: 'User not found.' });
+  res.render('user-form', { u, isNew: false, error: null, min: usersSvc.MIN_PASSWORD, me: req.user.Username });
+}));
+app.post('/users/:id', requireAdmin, wrap(async (req, res) => {
+  try {
+    const u = await usersSvc.amend(req.params.id, req.body, req.user.Username);
+    req.flash('ok', `User "${u.Username}" updated${u.passwordChanged ? ' and password changed' : ''}.`);
+    res.redirect('/users');
+  } catch (e) {
+    if (!isUserError(e)) throw e;
+    const u = await usersSvc.getById(req.params.id);
+    res.status(400).render('user-form', { u: { ...u, ...req.body, Active: req.body.Active === '1' }, isNew: false, error: e.message, min: usersSvc.MIN_PASSWORD, me: req.user.Username });
+  }
+}));
+app.post('/users/:id/delete', requireAdmin, wrap(async (req, res) => {
+  if (req.body.confirmed !== '1') {
+    req.flash('error', 'Nothing was deleted. Tap "Delete user" twice to confirm.');
+    return res.redirect(`/users/${req.params.id}`);
+  }
+  try {
+    const u = await usersSvc.removeUser(req.params.id, req.user.Username);
+    req.flash('ok', `User "${u.Username}" deleted. They can no longer log in.`);
+    res.redirect('/users');
+  } catch (e) {
+    if (!isUserError(e)) throw e;
+    req.flash('error', e.message);
+    res.redirect(`/users/${req.params.id}`);
+  }
+}));
+
+// ---------- My password (everyone) ----------
+app.get('/account/password', (req, res) => res.render('account-password', { error: null, min: usersSvc.MIN_PASSWORD, legacy: !!req.user.legacy }));
+app.post('/account/password', wrap(async (req, res) => {
+  try {
+    await usersSvc.changeOwnPassword(req.user.Username, req.body.Current, req.body.Password, req.body.Password2);
+    req.flash('ok', 'Your password has been changed.');
+    res.redirect('/');
+  } catch (e) {
+    if (!isUserError(e)) throw e;
+    res.status(400).render('account-password', { error: e.message, min: usersSvc.MIN_PASSWORD, legacy: !!req.user.legacy });
+  }
+}));
+
 // ---------- Settings ----------
 function renderSettings(res, form, error, status = 200) {
   const s = res.locals.settings;
@@ -399,8 +464,8 @@ function renderSettings(res, form, error, status = 200) {
     colours: settingsSvc.COLOURS, presets: settingsSvc.PRESETS,
   });
 }
-app.get('/settings', (req, res) => renderSettings(res, { ...res.locals.settings }, null));
-app.post('/settings', (req, res, next) => settingsUpload(req, res, (err) => {
+app.get('/settings', requireAdmin, (req, res) => renderSettings(res, { ...res.locals.settings }, null));
+app.post('/settings', requireAdmin, (req, res, next) => settingsUpload(req, res, (err) => {
   if (err) return renderSettings(res, { ...res.locals.settings, ...(req.body || {}) }, 'That image is too large — please choose one under 15 MB.', 400);
   next();
 }), wrap(async (req, res) => {
@@ -415,7 +480,7 @@ app.post('/settings', (req, res, next) => settingsUpload(req, res, (err) => {
     renderSettings(res, { ...res.locals.settings, ...req.body }, e.message, 400);
   }
 }));
-app.post('/settings/reset', wrap(async (req, res) => {
+app.post('/settings/reset', requireAdmin, wrap(async (req, res) => {
   if (req.body.confirmed !== '1') {
     req.flash('error', 'Nothing was reset. Tap "Reset to defaults" twice to confirm.');
     return res.redirect('/settings');

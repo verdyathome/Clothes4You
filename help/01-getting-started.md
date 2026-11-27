@@ -18,7 +18,7 @@ This app keeps the records HMRC expects from a sole trader selling clothes: what
 - **Sales**: everything sold, and the eBay import.
 - **Expenses**: running costs like packaging, postage and mileage.
 
-On a phone, the **☰ menu** (top right) holds **Help**, **Settings** and **Log out**. On a computer they sit on the right of the header.
+On a phone, the **☰ menu** (top right) holds **Help**, **Change password** and **Log out**, plus **Users** and **Settings** for Admins. On a computer they sit on the right of the header. See *Users, profiles and passwords* for what each profile can do.
 
 Most pages have a **How does this work?** link that opens the matching guide.
 
