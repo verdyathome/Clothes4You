@@ -330,6 +330,8 @@ async function prepareEbayImport(rows) {
   };
 }
 
+// rows[].ItemID is an existing item number, or "new-business" / "new-personal"
+// to create the item from the eBay order first (for past sales not yet in the app).
 async function importEbay(rows, user) {
   const done = [];
   const errors = [];
@@ -338,23 +340,56 @@ async function importEbay(rows, user) {
   const usedItems = new Set();
   for (const r of rows) {
     if (!r.ItemID) continue;
+    const isNew = r.ItemID === 'new-business' || r.ItemID === 'new-personal';
     if (r.OrderRef && imported.has(r.OrderRef)) {
       errors.push(`Order ${r.OrderRef}: already imported, skipped.`);
       continue;
     }
-    if (usedItems.has(String(r.ItemID))) {
+    if (!isNew && usedItems.has(String(r.ItemID))) {
       errors.push(`Order ${r.OrderRef}: item #${r.ItemID} was chosen for more than one order, skipped.`);
       continue;
     }
-    usedItems.add(String(r.ItemID));
     try {
-      const sale = await createSale({ ...r, Channel: 'eBay', Notes: r.Notes || 'Imported from eBay report' }, user);
+      let itemId = r.ItemID;
+      if (isNew) itemId = (await createItemFromOrder(r, user)).ItemID;
+      usedItems.add(String(itemId));
+      const sale = await createSale({ ...r, ItemID: itemId, Channel: 'eBay', Notes: r.Notes || 'Imported from eBay report' }, user);
+      sale.createdItem = isNew;
+      imported.add(r.OrderRef);
       done.push(sale);
     } catch (e) {
       errors.push(`Order ${r.OrderRef}: ${e.message}`);
     }
   }
   return { done, errors };
+}
+
+// Make an item from an eBay order line.
+// Business + cost + date paid → recorded as a one-item stock purchase, so the cost
+// counts in "Cost of goods bought for resale" for the tax year it was paid.
+async function createItemFromOrder(r, user) {
+  const title = String(r.Title || '').trim().slice(0, 250) || `eBay order ${r.OrderRef}`;
+  const note = `Created from eBay order ${r.OrderRef}`;
+  if (r.ItemID === 'new-personal') {
+    return createItem({ Description: title, Ownership: 'Personal', PurchaseID: null, DateAdded: r.SaleDate, Notes: note }, user);
+  }
+  const hasCost = r.NewCost !== undefined && String(r.NewCost).trim() !== '';
+  if (hasCost) {
+    const cost = toPence(r.NewCost);
+    if (cost < 0) throw new Error('the cost can\'t be negative.');
+    if (cost > 0) {
+      if (!isDate(r.NewCostDate)) throw new Error('enter the date the item was paid for, or leave the cost blank.');
+      if (r.NewCostDate > r.SaleDate) throw new Error('the date paid is after the sale date.');
+      const p = await createPurchase(
+        { PurchaseDate: r.NewCostDate, TotalCost: fromPence(cost), Supplier: '', SourceType: 'Other', PaymentMethod: '', Notes: `Added during eBay import (order ${r.OrderRef})` },
+        [{ Description: title, Notes: note }],
+        user
+      );
+      const [item] = await db.select(T.items.name, { PurchaseID: p.PurchaseID });
+      return item;
+    }
+  }
+  return createItem({ Description: title, Ownership: 'Business', PurchaseID: null, CostAllocated: 0, DateAdded: r.SaleDate, Notes: `${note}. Cost not recorded — if it was bought as stock, add it as a stock purchase.` }, user);
 }
 
 module.exports = {

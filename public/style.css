@@ -139,3 +139,22 @@ code { background: var(--soft); padding: 1px 5px; border-radius: 4px; }
 .preview .pv-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
 .favicon-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .favicon-row img { width: 48px; height: 48px; border-radius: 10px; border: 1px solid var(--line); object-fit: cover; background: var(--card); }
+.bulk-create { display: flex; flex-direction: column; gap: 2px; }
+.new-cost { display: flex; gap: 6px; margin-top: 6px; }
+.new-cost label { margin: 0; font-size: .8rem; flex: 1; }
+.new-cost input { padding: 6px 8px; width: 100%; }
+.item-pick { max-width: 260px; }
+/* eBay import preview: one card per order on phones (the item picker must stay visible) */
+@media (max-width: 760px) {
+  .list.import-table th, .list.import-table td { display: block !important; }
+  .import-table thead { display: none !important; }
+  .import-table, .import-table tbody, .import-table tr { display: block; width: 100%; }
+  .import-table tr { padding: 12px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px 8px; }
+  .import-table td { border: 0 !important; padding: 0 !important; }
+  .import-table td.imp-date { grid-column: 1 / -1; color: var(--muted); font-size: .85rem; }
+  .import-table td:nth-child(2) { grid-column: 1 / -1; font-weight: 600; }
+  .import-table td.num { text-align: left !important; font-size: .85rem; }
+  .import-table td.num::before { content: attr(data-label); display: block; color: var(--muted); font-size: .75rem; font-weight: 400; }
+  .import-table td:last-child { grid-column: 1 / -1; margin-top: 6px; }
+  .import-table .item-pick { max-width: none; width: 100%; min-height: 44px; }
+}
