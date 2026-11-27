@@ -42,7 +42,7 @@
       <label>Item came back?
         <select name="ItemReturned"><option value="yes">Yes — put back in stock</option><option value="no">No (partial refund / not returned)</option></select>
       </label>
-      <button type="submit" class="btn">Save refund</button>
+      <button type="submit" class="btn" data-confirm="Tap again to save the refund">Save refund</button>
     </form>
   </details>
   <% } %>
@@ -64,7 +64,7 @@
     <label>Listed on
       <select name="ListedOn"><option value=""></option><% LISTS.channels.forEach(c => { %><option <%= item.ListedOn === c ? 'selected' : '' %>><%= c %></option><% }) %></select>
     </label>
-    <button type="submit" class="btn">Update</button>
+    <button type="submit" class="btn" data-confirm="Tap again to write this item off" data-confirm-when="Status=Written off">Update</button>
   </form>
 </section>
 <% } else if (item.Status === 'Written off') { %>

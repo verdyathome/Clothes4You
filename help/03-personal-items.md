@@ -30,4 +30,4 @@ Every item, Business or Personal, has a status you can change on its page under 
 | **In stock** | Owned, not listed yet |
 | **Listed** | Up for sale; choose where it's **Listed on** (Vinted, eBay, Other) |
 | **Sold** | Set automatically when a sale is recorded |
-| **Written off** | Damaged, lost or given away. It disappears from the sale list. **Put back in stock** undoes it. |
+| **Written off** | Damaged, lost or given away. It disappears from the sale list. You'll be asked to tap **Update** twice to confirm. **Put back in stock** undoes it. |

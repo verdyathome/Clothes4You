@@ -18,7 +18,7 @@ Refunds are recorded **on the sale**, from the item's page.
    - **Date refund paid**: the day the money went back to the buyer.
    - **Amount refunded (£)**: filled in with the full amount the buyer paid. Change it for a partial refund.
    - **Item came back?**: choose **Yes** if the buyer returned it. The item goes back **In stock**, ready to sell again. Choose **No** for a partial refund or if it wasn't returned.
-4. Tap **Save refund**.
+4. Tap **Save refund**, then tap it **again** to confirm. The button turns red and says *Tap again to save the refund*; tap **Cancel** or wait a few seconds to back out.
 
 ## How refunds affect the figures
 
