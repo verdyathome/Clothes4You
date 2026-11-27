@@ -43,7 +43,9 @@ const receiptUpload = multer({
   limits: { fileSize: 10 * 1024 * 1024, files: 1 },
   fileFilter: (req, file, cb) => cb(null, /^image\/|^application\/pdf$/.test(file.mimetype)),
 });
-const iconUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 2 * 1024 * 1024, files: 1 } });
+const settingsUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 15 * 1024 * 1024, files: 2 } })
+  .fields([{ name: 'favicon', maxCount: 1 }, { name: 'loginBg', maxCount: 1 }]);
+const images = require('./src/images');
 const csvUpload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 } });
 
 // Shared template helpers + one-shot flash messages
@@ -61,24 +63,76 @@ app.use(async (req, res, next) => {
     const s = await settingsSvc.load();
     res.locals.settings = s;
     res.locals.themeCss = settingsSvc.themeCss(s);
-    res.locals.faviconVersion = s.Favicon ? crypto.createHash('sha1').update(s.Favicon).digest('hex').slice(0, 8) : '';
+    res.locals.faviconVersion = s.assetVer;
+    res.locals.splashDevices = images.SPLASH_DEVICES;
     next();
   } catch (e) { next(e); }
 });
 
-// Public: browsers fetch the icon before anyone logs in
-app.get(['/favicon', '/favicon.ico', '/apple-touch-icon.png'], async (req, res) => {
-  const s = res.locals.settings;
-  if (!s.Favicon) return res.status(404).end();
-  res.setHeader('Content-Type', s.FaviconType || 'image/png');
-  res.setHeader('Cache-Control', req.query.v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600');
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  res.send(Buffer.from(s.Favicon, 'base64'));
-});
-
+// Helpers
 const wrap = (fn) => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 const isUserError = (e) => !/^Caspio/.test(e.message);
 const fileFrom = (f) => (f ? { buffer: f.buffer, filename: f.originalname || 'receipt', mimetype: f.mimetype } : null);
+
+// ---------- Public images (browsers and iPhones fetch these before anyone logs in) ----------
+const generated = new Map(); // small cache of icons / launch screens, keyed by settings version
+async function cachedImage(key, make) {
+  if (generated.has(key)) return generated.get(key);
+  const buf = await make();
+  if (generated.size > 60) generated.delete(generated.keys().next().value);
+  generated.set(key, buf);
+  return buf;
+}
+function sendImage(req, res, buf, type) {
+  res.setHeader('Content-Type', type);
+  res.setHeader('Cache-Control', req.query.v ? 'public, max-age=31536000, immutable' : 'public, max-age=3600');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.send(buf);
+}
+const iconSource = async (s) => ({
+  iconLarge: (await settingsSvc.getBlob('IconLarge')) || (s.Favicon ? Buffer.from(s.Favicon, 'base64') : null),
+  accent: s.Accent, accentInk: s.AccentInk, bg: s.Bg,
+});
+
+app.get(['/favicon', '/favicon.ico'], wrap(async (req, res) => {
+  const s = res.locals.settings;
+  if (s.Favicon) return sendImage(req, res, Buffer.from(s.Favicon, 'base64'), s.FaviconType || 'image/png');
+  sendImage(req, res, await cachedImage(`icon64-${s.assetVer}`, async () => images.iconPng(64, { ...(await iconSource(s)), rounded: true })), 'image/png');
+}));
+app.get(['/app-icon/:size.png', '/apple-touch-icon.png'], wrap(async (req, res) => {
+  const size = req.params.size ? Number(req.params.size) : 180;
+  if (!images.ICON_SIZES.has(size)) return res.status(404).end();
+  const s = res.locals.settings;
+  sendImage(req, res, await cachedImage(`icon${size}-${s.assetVer}`, async () => images.iconPng(size, await iconSource(s))), 'image/png');
+}));
+app.get('/splash/:size.png', wrap(async (req, res) => {
+  if (!images.SPLASH_SIZES.has(req.params.size)) return res.status(404).end();
+  const [w, h] = req.params.size.split('x').map(Number);
+  const s = res.locals.settings;
+  sendImage(req, res, await cachedImage(`splash${w}x${h}-${s.assetVer}`, async () => images.splashPng(w, h, await iconSource(s))), 'image/png');
+}));
+app.get('/login-bg', wrap(async (req, res) => {
+  const bg = await settingsSvc.getBlob('LoginBg');
+  if (!bg) return res.status(404).end();
+  sendImage(req, res, bg, 'image/webp');
+}));
+// Lets the app be added to a phone's home screen and open full-screen, like an installed app
+app.get('/manifest.webmanifest', (req, res) => {
+  const s = res.locals.settings;
+  res.setHeader('Content-Type', 'application/manifest+json');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.send(JSON.stringify({
+    name: s.AppName,
+    short_name: s.AppName.length > 14 ? s.AppName.split(' ')[0].slice(0, 14) : s.AppName,
+    start_url: '/',
+    scope: '/',
+    display: 'standalone',
+    background_color: s.Bg,
+    theme_color: s.HeaderBg,
+    icons: [192, 512].map((n) => ({ src: `/app-icon/${n}.png?v=${s.assetVer}`, sizes: `${n}x${n}`, type: 'image/png', purpose: 'any' })),
+  }));
+});
+
 
 async function yearChoice(req) {
   const years = await svc.taxYearsInUse();
@@ -86,7 +140,10 @@ async function yearChoice(req) {
 }
 
 // ---------- Auth ----------
-app.get('/login', (req, res) => res.render('login', { error: null }));
+app.get('/login', (req, res) => {
+  if (req.session.user) return res.redirect('/');
+  res.render('login', { error: null });
+});
 app.post('/login', (req, res) => {
   const { username = '', password = '' } = req.body;
   if (checkLogin(username, password)) {
@@ -337,12 +394,13 @@ function renderSettings(res, form, error, status = 200) {
   });
 }
 app.get('/settings', (req, res) => renderSettings(res, { ...res.locals.settings }, null));
-app.post('/settings', (req, res, next) => iconUpload.single('favicon')(req, res, (err) => {
-  if (err) return renderSettings(res, { ...res.locals.settings, ...(req.body || {}) }, 'The icon file is too large — please use one under 45 KB.', 400);
+app.post('/settings', (req, res, next) => settingsUpload(req, res, (err) => {
+  if (err) return renderSettings(res, { ...res.locals.settings, ...(req.body || {}) }, 'That image is too large — please choose one under 15 MB.', 400);
   next();
 }), wrap(async (req, res) => {
   try {
-    const saved = await settingsSvc.save(req.body, fileFrom(req.file));
+    const f = req.files || {};
+    const saved = await settingsSvc.save(req.body, { favicon: fileFrom((f.favicon || [])[0]), loginBg: fileFrom((f.loginBg || [])[0]) });
     const w = settingsSvc.warnings(saved);
     req.flash(w.length ? 'error' : 'ok', w.length ? `Settings saved, but: ${w.join(' ')}` : 'Settings saved.');
     res.redirect('/settings');

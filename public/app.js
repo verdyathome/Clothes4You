@@ -65,6 +65,17 @@
       for (const key of Object.keys(map)) sform.querySelector(`input[name="${key}"]`).value = p[key];
       sync();
     }));
+    const bgPrev = document.getElementById('bg-preview');
+    const bgFile = sform.querySelector('input[name="loginBg"]');
+    const dim = sform.querySelector('input[name="LoginBgDim"]');
+    if (bgFile) bgFile.addEventListener('change', () => {
+      const f = bgFile.files[0];
+      if (f) bgPrev.style.backgroundImage = `url("${URL.createObjectURL(f)}")`;
+    });
+    if (dim) dim.addEventListener('input', () => {
+      bgPrev.style.setProperty('--login-dim', dim.value / 100);
+      document.getElementById('dim-val').textContent = `${dim.value}%`;
+    });
     const fav = sform.querySelector('input[name="favicon"]');
     if (fav) fav.addEventListener('change', () => {
       const f = fav.files[0];

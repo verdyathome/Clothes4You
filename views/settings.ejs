@@ -33,15 +33,34 @@
       </section>
 
       <section class="card">
-        <h2>App icon (favicon)</h2>
-        <p class="muted small">Shown in the browser tab and as the icon if she adds the app to her iPhone home screen. Use a square PNG, ideally 180 × 180, under 45 KB.</p>
+        <h2>App icon</h2>
+        <p class="muted small">Shown in the browser tab, on the login screen, on the launch screen and as the iPhone home-screen icon. Any photo or logo works: it's cropped to a square and resized for you. Without one, a coat hanger in your button colour is used.</p>
         <div class="favicon-row">
-          <img id="favicon-preview" src="<%= settings.Favicon ? '/favicon?v=' + faviconVersion : '' %>" alt="Current icon" <%= settings.Favicon ? '' : 'hidden' %>>
-          <label style="flex: 1; margin: 0">Upload icon <input type="file" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/gif,image/webp"></label>
+          <img id="favicon-preview" src="/app-icon/192.png?v=<%= faviconVersion %>" alt="Current icon">
+          <label style="flex: 1; margin: 0">Upload icon <input type="file" name="favicon" accept="image/png,image/jpeg,image/webp,image/gif"></label>
         </div>
-        <% if (settings.Favicon) { %>
-          <label style="flex-direction: row; align-items: center; gap: 8px; margin-top: 8px"><input type="checkbox" name="removeFavicon" value="1"> Remove the current icon</label>
+        <% if (settings.hasIcon) { %>
+          <label style="flex-direction: row; align-items: center; gap: 8px; margin-top: 8px"><input type="checkbox" name="removeFavicon" value="1"> Remove my icon (use the coat hanger)</label>
         <% } %>
+      </section>
+
+      <section class="card">
+        <h2>Login screen background</h2>
+        <p class="muted small">A photo behind the login box, for example clothes on a rail. Large photos are shrunk automatically. Use the darkness slider so the login box stands out.</p>
+        <div class="bg-preview" id="bg-preview" style="--login-dim: <%= Number(form.LoginBgDim) / 100 %>;<% if (settings.hasLoginBg) { %> background-image: url('/login-bg?v=<%= settings.LoginBgVer %>')<% } %>"><span>Log in</span></div>
+        <label style="margin-top: 10px">Choose photo <input type="file" name="loginBg" accept="image/jpeg,image/png,image/webp"></label>
+        <label>Darkness
+          <span class="range-row"><input type="range" name="LoginBgDim" min="0" max="80" step="5" value="<%= form.LoginBgDim %>" aria-describedby="dim-val"><output id="dim-val"><%= form.LoginBgDim %>%</output></span>
+        </label>
+        <% if (settings.hasLoginBg) { %>
+          <label style="flex-direction: row; align-items: center; gap: 8px"><input type="checkbox" name="removeLoginBg" value="1"> Remove the photo (plain background)</label>
+        <% } %>
+      </section>
+
+      <section class="card">
+        <h2>Use it like an app on the iPhone</h2>
+        <p class="small">Open the app in <strong>Safari</strong>, tap the <strong>Share</strong> button, then <strong>Add to Home Screen</strong>. It then opens full-screen from its own icon, with a launch screen in your colours while it starts.</p>
+        <p class="muted small">After changing the icon or colours, remove the home-screen icon and add it again to pick up the change.</p>
       </section>
     </div>
 
