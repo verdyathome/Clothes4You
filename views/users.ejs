@@ -1,0 +1,21 @@
+<%- include('partials/header', { title: 'Users' }) %>
+<div class="head-row"><h1>Users</h1><% if (ready) { %><a class="btn primary" href="/users/new">+ Add user</a><% } %></div>
+<p class="muted small"><strong>Admins</strong> can do everything, including managing users and Settings. <strong>Users</strong> can record and view purchases, items, sales, refunds, expenses and imports, but can't see Settings or this page.</p>
+<% if (!ready) { %>
+  <div class="banner error">The Caspio table <code>CSP_Users</code> doesn't exist yet, or the app isn't allowed to use it. Logins are still coming from Railway's <code>USERS_JSON</code> setting. Create the table (see SETUP.md), then log out and in again.</div>
+<% } else { %>
+<table class="list">
+  <thead><tr><th>User</th><th>Role</th><th>Status</th><th>Last login</th></tr></thead>
+  <tbody>
+  <% users.forEach(u => { %>
+    <tr>
+      <td><a href="/users/<%= u.UserID %>"><%= u.DisplayName || u.Username %></a><div class="muted small"><%= u.Username %><%= u.Username === me ? ' · you' : '' %></div></td>
+      <td><span class="pill <%= u.Role === 'Admin' ? 'listed' : 'instock' %>"><%= u.Role %></span></td>
+      <td><%= u.Active ? 'Active' : 'Disabled' %></td>
+      <td class="small"><%= u.LastLogin ? ukDate(u.LastLogin) : 'Never' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+<% } %>
+<%- include('partials/footer') %>

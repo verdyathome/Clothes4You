@@ -114,6 +114,13 @@ async function update(table, filter, fields) {
   return json.RecordsAffected ?? 0;
 }
 
+async function remove(table, filter) {
+  const where = whereFrom(filter);
+  if (!where) throw new Error('Refusing to delete without a filter');
+  const json = await call('DELETE', `/tables/${table}/records`, { query: { 'q.where': where } });
+  return json.RecordsAffected ?? 0;
+}
+
 // ---------- Attachment fields ----------
 // REST v3: PUT/GET /tables/{table}/attachments/{field}/{PK_ID}
 async function uploadAttachment(table, field, pkId, { buffer, filename, mimetype }) {
@@ -139,4 +146,4 @@ async function downloadAttachment(table, field, pkId) {
   };
 }
 
-module.exports = { select, insert, update, uploadAttachment, downloadAttachment, name: 'caspio' };
+module.exports = { select, insert, update, remove, uploadAttachment, downloadAttachment, name: 'caspio' };

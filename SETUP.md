@@ -1,4 +1,4 @@
-# Clothing Portal — setup (v0.4.0)
+# Clothing Portal — setup (v0.6.0)
 
 ## 1. Create the Caspio tables
 
@@ -87,6 +87,22 @@ Create four tables in Caspio (CSP_Expenses was added in v0.2.0). Field names are
 
 Until this table exists the app runs on its default name and colours, and saving settings shows an error.
 
+### CSP_Users *(v0.6.0)*
+| Field | Caspio type | Notes |
+|---|---|---|
+| UserID | AutoNumber | unique |
+| Username | Text (255) | unique, lower case |
+| DisplayName | Text (255) | |
+| Role | Text (255) | `Admin` or `User` |
+| PasswordHash | Text (255) | scrypt hash, never the password itself |
+| Active | Yes/No | |
+| LastLogin | Date/Time | |
+| CreatedBy | Text (255) | |
+
+The Web Services profile needs **Read, Insert, Update and Delete** on CSP_Users (Delete is only needed for this table).
+
+**Switching from USERS_JSON:** until an Admin exists in CSP_Users, the logins in Railway's `USERS_JSON` still work. Each one is copied into CSP_Users (with a hashed password) the first time it's used. Set the Railway variable `FIRST_ADMIN=simon` so that login becomes the Admin and any other becomes a User. Once an Admin exists, `USERS_JSON` is ignored for anyone not yet copied, so add them on the Users page. When everyone can log in, **delete `USERS_JSON` and `FIRST_ADMIN` from Railway**.
+
 Optional: add indexes on `TaxYear` (Purchases, Sales) and `Status` (Items).
 
 ## 2. Create a Caspio Web Services profile
@@ -122,7 +138,7 @@ npm start
 |---|---|
 | `NODE_ENV` | `production` |
 | `SESSION_SECRET` | a long random string (40+ characters) |
-| `USERS_JSON` | `{"simon":"long-password-1","<her-username>":"long-password-2"}` |
+| `USERS_JSON` | only needed until CSP_Users exists (see below) |
 | `CASPIO_TOKEN_URL` | from step 2 |
 | `CASPIO_REST_URL` | from step 2 |
 | `CASPIO_CLIENT_ID` | from step 2 |

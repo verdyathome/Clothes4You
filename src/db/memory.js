@@ -39,6 +39,12 @@ async function update(table, filter, fields) {
   return n;
 }
 
+async function remove(table, filter) {
+  const before = (store[table] || []).length;
+  store[table] = (store[table] || []).filter((r) => !matches(r, filter));
+  return before - store[table].length;
+}
+
 async function uploadAttachment(table, field, pkId, file) {
   attachments[`${table}/${field}/${pkId}`] = { buffer: file.buffer, contentType: file.mimetype };
   const row = (store[table] || []).find((r) => r.PK_ID === Number(pkId));
@@ -49,4 +55,4 @@ async function downloadAttachment(table, field, pkId) {
   return attachments[`${table}/${field}/${pkId}`] || null;
 }
 
-module.exports = { select, insert, update, uploadAttachment, downloadAttachment, name: 'memory' };
+module.exports = { select, insert, update, remove, uploadAttachment, downloadAttachment, name: 'memory' };

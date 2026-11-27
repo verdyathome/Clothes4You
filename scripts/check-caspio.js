@@ -8,6 +8,7 @@ const EXPECTED = {
   purchases: ['PurchaseID', 'PurchaseDate', 'Supplier', 'SourceType', 'PaymentMethod', 'TotalCost', 'ItemCount', 'ReceiptRef', 'Notes', 'TaxYear', 'CreatedBy'],
   sales: ['SaleID', 'ItemID', 'SaleDate', 'Channel', 'OrderRef', 'SalePrice', 'BuyerPostage', 'PlatformFee', 'PostageCost', 'Ownership', 'ItemCost', 'TaxYear', 'Refunded', 'RefundDate', 'RefundAmount', 'ItemReturned', 'Notes', 'CreatedBy'],
   settings: ['SettingID', 'SettingKey', 'SettingValue'],
+  users: ['UserID', 'Username', 'DisplayName', 'Role', 'PasswordHash', 'Active', 'LastLogin', 'CreatedBy'],
   expenses: ['ExpenseID', 'ExpenseDate', 'Description', 'ExpenseType', 'SA103Category', 'Amount', 'Miles', 'Supplier', 'PaymentMethod', 'TaxYear', 'Receipt', 'Notes', 'CreatedBy'],
 };
 

@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.0 — 2026-11-27
+**Needs Caspio:** new table `CSP_Users`, with Delete permission on it (see SETUP.md).
+- **User accounts in Caspio** with two profiles: **Admin** (everything, plus Users and Settings) and **User** (records and views everything else)
+- Users page for Admins: add, amend (name, profile, active/disabled, reset password) and delete (two-tap confirm)
+- Change your own password, for everyone
+- Passwords stored only as scrypt hashes; 5 wrong passwords lock that username for 15 minutes; the last Admin can't be removed or demoted; disabled/deleted users are signed out at once
+- Switch-over: USERS_JSON logins are copied into Caspio on first use until an Admin exists (`FIRST_ADMIN` chooses who becomes Admin)
+- Settings is now Admin-only; menu shows Users/Settings only to Admins
+- Desktop header: phone layout up to 900px, icon buttons between 901–1150px, so nothing wraps
+- New Help guide: Users, profiles and passwords
+
 ## 0.5.1 — 2026-11-27
 - Two-step confirmation for actions that can't easily be undone: **Reset to defaults**, **Save refund** and **writing an item off**. The first tap turns the button red ("Tap again to…") with a Cancel button; it resets itself after 6 seconds
 - The server also refuses these actions unless they were confirmed

@@ -6,7 +6,7 @@ pages: /settings
 ---
 # Settings: name, colours, icon and login screen
 
-Open **Settings** from the **☰ menu** on a phone, or the **⚙ Settings** button on a computer.
+Open **Settings** from the **☰ menu** on a phone, or the **⚙ Settings** button on a computer. **Only Admins** can see and change Settings.
 
 ![The settings page](/guide-img/settings.png)
 
