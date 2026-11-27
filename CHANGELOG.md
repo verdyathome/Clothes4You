@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.1 — 2026-11-27
+- Desktop: Settings is now a clear button with a gear icon (highlighted when you're on the Settings page)
+- Phone layout (title row + page row + ☰ menu) now also used for windows up to 760px wide, e.g. iPad portrait or a narrow laptop window, where the page links used to wrap
+- "Signed in as…" hidden on mid-size screens to save room
+
 ## 0.3.0 — 2026-11-27
 **Needs Caspio:** new table `CSP_Settings` (see SETUP.md).
 - Settings page: app name, colour scheme (buttons, button text, page background, panels, header, text) with six presets, live preview and readability warnings, app icon/favicon upload (also used for the iPhone home-screen icon), reset to defaults

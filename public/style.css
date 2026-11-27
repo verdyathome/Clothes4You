@@ -32,7 +32,10 @@ h2 { font-size: 1.1rem; margin: 0 0 10px; }
 .menu-panel { display: flex; align-items: center; gap: 14px; }
 .menu-panel .menu-user { color: var(--muted); }
 .menu-panel a { text-decoration: none; }
-.menu-panel a.on { font-weight: 600; text-decoration: underline; text-underline-offset: 4px; }
+.settings-btn { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--card); }
+.settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+.settings-btn.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+@media (max-width: 1000px) { .menu-panel .menu-user { display: none; } }
 .logout { margin: 0; }
 .logout button { color: var(--accent); }
 
@@ -92,15 +95,17 @@ details.refund summary { cursor: pointer; color: var(--accent); margin-bottom: 1
 code { background: var(--soft); padding: 1px 5px; border-radius: 4px; }
 .foot { text-align: center; color: var(--muted); font-size: .8rem; padding: 20px; }
 
-/* ---------- Phones: title row, then the pages in one row underneath ---------- */
-@media (max-width: 640px) {
+/* ---------- Phones / narrow windows: title row, then the pages in one row underneath ---------- */
+@media (max-width: 760px) {
   .topbar { grid-template-columns: 1fr auto; grid-template-areas: "brand menu" "nav nav"; gap: 6px 12px; padding: 8px 16px 10px; padding-top: max(8px, env(safe-area-inset-top)); }
   .brand { font-size: 1.15rem; }
   .menu-toggle { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: var(--ink); border-radius: 8px; }
   .menu-toggle[aria-expanded="true"] { background: var(--nav-bg); }
   .menu-panel { display: none; position: absolute; right: 0; top: calc(100% + 6px); z-index: 20; min-width: 200px; flex-direction: column; align-items: stretch; gap: 0; padding: 6px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.14); }
   .menu-panel.open { display: flex; }
-  .menu-panel .menu-user { padding: 8px 12px 6px; font-size: .8rem; }
+  .menu-panel .menu-user { display: block; padding: 8px 12px 6px; font-size: .8rem; }
+  .menu-panel .settings-btn { border: 0; background: transparent; gap: 10px; }
+  .menu-panel .settings-btn.on { background: var(--nav-bg); color: var(--ink); }
   .menu-panel a, .menu-panel .logout button { display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; color: var(--ink); font-size: 1rem; text-decoration: none; width: 100%; text-align: left; }
   .menu-panel a.on { background: var(--nav-bg); text-decoration: none; }
   .menu-panel .logout { border-top: 1px solid var(--line); margin-top: 4px; padding-top: 4px; }
