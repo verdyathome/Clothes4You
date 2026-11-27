@@ -10,12 +10,12 @@ h1 { font-size: 1.5rem; margin: 8px 0; }
 h2 { font-size: 1.1rem; margin: 0 0 10px; }
 .muted { color: var(--muted); } .small { font-size: .85rem; }
 
-.topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; padding: 10px 16px; background: var(--card); border-bottom: 1px solid var(--line); }
-.brand { font-weight: 700; text-decoration: none; color: var(--ink); }
-.topbar nav { display: flex; gap: 4px; flex-wrap: wrap; flex: 1; }
+.topbar { display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: "brand nav logout"; align-items: center; gap: 8px 18px; padding: 10px 16px; padding-top: max(10px, env(safe-area-inset-top)); background: var(--card); border-bottom: 1px solid var(--line); }
+.brand { grid-area: brand; font-weight: 700; text-decoration: none; color: var(--ink); }
+.topbar nav { grid-area: nav; display: flex; gap: 4px; flex-wrap: wrap; }
 .topbar nav a { text-decoration: none; padding: 6px 10px; border-radius: 6px; color: var(--ink); }
 .topbar nav a.on { background: var(--accent); color: var(--accent-ink); }
-.logout { margin: 0; }
+.logout { grid-area: logout; margin: 0; }
 
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 14px 0; }
 .card.narrow { max-width: 380px; margin: 60px auto; }
@@ -72,3 +72,21 @@ details.refund summary { cursor: pointer; color: var(--accent); margin-bottom: 1
 .list tfoot td { border-bottom: 0; }
 code { background: #f1ede8; padding: 1px 5px; border-radius: 4px; }
 .foot { text-align: center; color: var(--muted); font-size: .8rem; padding: 20px; }
+
+/* ---------- Phones: title row, then the pages in one row underneath ---------- */
+@media (max-width: 640px) {
+  .topbar { grid-template-columns: 1fr auto; grid-template-areas: "brand logout" "nav nav"; gap: 6px 12px; padding: 8px 16px 10px; padding-top: max(8px, env(safe-area-inset-top)); }
+  .brand { font-size: 1.15rem; }
+  .logout button { font-size: .85rem; min-height: 44px; padding: 0; }
+  .topbar nav { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #f3efea; border-radius: 10px; flex-wrap: nowrap; }
+  .topbar nav a { display: flex; align-items: center; justify-content: center; min-height: 40px; padding: 0 1px; font-size: .74rem; letter-spacing: -.01em; white-space: nowrap; border-radius: 7px; }
+  .topbar nav a.on { font-weight: 600; }
+  main { padding: 14px 16px; }
+  h1 { font-size: 1.35rem; }
+  .dash-actions .btn { flex: 1 1 calc(50% - 4px); text-align: center; padding: 11px 6px; font-size: .9rem; white-space: nowrap; }
+  .dash-actions .btn.primary { flex: 1 1 100%; padding: 13px; font-size: 1rem; }
+  .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .tile { padding: 12px; }
+  .tile strong { font-size: 1.3rem; }
+  .tile small { font-size: .75rem; }
+}
