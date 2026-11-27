@@ -9,6 +9,7 @@ const db = require('./src/db');
 const ebay = require('./src/ebay');
 const { buildWorkbook } = require('./src/export');
 const settingsSvc = require('./src/settings');
+const help = require('./src/help');
 const crypto = require('crypto');
 const { checkLogin, requireLogin, normUser } = require('./src/auth');
 const { money, today, isDate, taxYearOf, ukDate } = require('./src/util');
@@ -103,6 +104,12 @@ app.post('/logout', (req, res) => {
 app.get('/health', (req, res) => res.json({ ok: true, version: VERSION }));
 
 app.use(requireLogin);
+
+// The guide for the page being viewed, for the "How does this work?" link
+app.use((req, res, next) => {
+  res.locals.helpGuide = req.path.startsWith('/help') ? null : help.forPath(req.path);
+  next();
+});
 
 // ---------- Dashboard ----------
 app.get('/', wrap(async (req, res) => {
@@ -308,6 +315,18 @@ app.get('/expenses/:id/receipt', wrap(async (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.send(file.buffer);
 }));
+
+// ---------- Help ----------
+app.get('/help', (req, res) => {
+  const q = String(req.query.q || '').trim().slice(0, 100);
+  res.render('help-index', { guides: help.list(), q, results: q ? help.search(q) : null });
+});
+app.get('/help/:slug', (req, res) => {
+  const all = help.list();
+  const i = all.findIndex((g) => g.slug === req.params.slug);
+  if (i === -1) return res.status(404).render('error', { message: 'Guide not found.' });
+  res.render('help', { guide: all[i], prev: all[i - 1] || null, next: all[i + 1] || null, guides: all });
+});
 
 // ---------- Settings ----------
 function renderSettings(res, form, error, status = 200) {

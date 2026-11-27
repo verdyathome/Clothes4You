@@ -1,4 +1,4 @@
-# Clothing Portal — setup (v0.3.0)
+# Clothing Portal — setup (v0.4.0)
 
 ## 1. Create the Caspio tables
 
@@ -139,3 +139,11 @@ All data lives in Caspio, so redeploying or restarting on Railway never loses re
 - **Turnover** = business sale prices + postage charged to buyers, in the tax year the sale is dated (cash basis).
 - **Cost of goods** = stock purchases *paid* in the tax year (cash basis), not the cost of items sold. Profit per item is shown separately for her own interest.
 - **Personal items** are recorded but left out of all SA103 figures. They do appear in the calendar-year platform check, because Vinted and eBay include them in what they report to HMRC.
+
+## Editing the Help guides
+
+The guides shown under **Help** are Markdown files in the `help/` folder, one per guide, numbered in the order they appear.
+
+- On GitHub, open the file, click the ✏️ pencil, edit, and **Commit changes** to a new branch → open a pull request → merge. Railway redeploys with the new wording.
+- The block at the top (`title`, `order`, `summary`, `pages`) controls the guide's name, position, the line shown on the Help page, and which app pages show a "How does this work?" link to it (`/purchases/*` = every page starting with `/purchases/`).
+- Screenshots are in `public/guide-img/` and are shown with `![description](/guide-img/name.png)`.

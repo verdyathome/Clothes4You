@@ -66,6 +66,7 @@
   <p class="muted small">Vinted and eBay report sellers to HMRC per calendar year once they reach 30 sales or about £1,700, <em>including personal items</em>. These totals should line up with what each platform reports.</p>
   <% const names = Object.keys(platforms); %>
   <% if (!names.length) { %><p>No sales in <%= cy %>.</p><% } else { %>
+  <div class="table-scroll">
   <table class="list">
     <thead><tr><th>Platform</th><th>Sales</th><th class="num">Gross</th><th class="num">Refunds</th><th class="num">Business</th><th class="num">Personal</th></tr></thead>
     <tbody>
@@ -74,6 +75,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </section>
 <%- include('partials/footer') %>
