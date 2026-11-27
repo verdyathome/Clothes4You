@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.5.0 — 2026-11-27
+- **Login screen background photo** (Settings), with a darkness slider and live preview; photos are shrunk to WebP automatically and stored in CSP_Settings in pieces
+- Login screen redesigned: centred card with the app icon and name
+- **App icon**: any image now accepted — cropped square and resized automatically (no more 45 KB limit). Default icon: a coat hanger in the button colour
+- **Add to Home Screen** support: web app manifest, full-screen ("standalone") mode, home-screen icons, and iPhone **launch screens** (icon on the page colour) for 11 iPhone sizes, generated from Settings
+- No timed splash screen: the app opens straight away; the launch screen shows while it starts from the home screen
+- Settings guide updated
+
 ## 0.4.0 — 2026-11-27
 - **In-app Help**: 11 illustrated guides (getting started, stock purchases, personal items, sales, refunds, expenses, eBay import, tax years & SA103, platform check, Excel download, settings) with search
 - Help in the ☰ menu on phones and a **? Help** button beside Settings on desktop

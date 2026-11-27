@@ -8,10 +8,15 @@
   <style>:root{<%- themeCss %>}</style>
   <meta name="theme-color" content="<%= settings.HeaderBg %>">
   <meta name="apple-mobile-web-app-title" content="<%= settings.AppName %>">
-  <% if (settings.Favicon) { %>
   <link rel="icon" href="/favicon?v=<%= faviconVersion %>">
-  <link rel="apple-touch-icon" href="/favicon?v=<%= faviconVersion %>">
-  <% } %>
+  <link rel="apple-touch-icon" href="/app-icon/180.png?v=<%= faviconVersion %>">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <% splashDevices.forEach(d => { %>
+  <link rel="apple-touch-startup-image" media="screen and (device-width: <%= d.w %>px) and (device-height: <%= d.h %>px) and (-webkit-device-pixel-ratio: <%= d.r %>) and (orientation: portrait)" href="/splash/<%= d.w * d.r %>x<%= d.h * d.r %>.png?v=<%= faviconVersion %>">
+  <% }) %>
 </head>
 <body>
 <% if (user) { %>
