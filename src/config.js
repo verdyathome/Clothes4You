@@ -4,6 +4,7 @@ const TABLES = {
   purchases: { name: process.env.TBL_PURCHASES || 'CSP_Purchases', id: 'PurchaseID' },
   sales: { name: process.env.TBL_SALES || 'CSP_Sales', id: 'SaleID' },
   expenses: { name: process.env.TBL_EXPENSES || 'CSP_Expenses', id: 'ExpenseID' },
+  settings: { name: process.env.TBL_SETTINGS || 'CSP_Settings', id: 'SettingID' },
 };
 
 // SA103 self-employment expense categories (names as on the form; box numbers

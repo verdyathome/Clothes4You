@@ -1,0 +1,76 @@
+<%- include('partials/header', { title: 'Settings' }) %>
+<h1>Settings</h1>
+<% if (error) { %><div class="banner error"><%= error %></div><% } %>
+<% if (warnings.length) { %><div class="banner warn"><strong>Readability:</strong> <%= warnings.join(' ') %></div><% } %>
+
+<form method="post" action="/settings" enctype="multipart/form-data" id="settings-form">
+  <div class="grid2">
+    <div>
+      <section class="card">
+        <h2>App name</h2>
+        <label>Shown top-left and in the browser tab <input name="AppName" value="<%= form.AppName %>" maxlength="40" required></label>
+      </section>
+
+      <section class="card">
+        <h2>Colour scheme</h2>
+        <p class="muted small">Start from a preset, then fine-tune any colour.</p>
+        <div class="presets">
+          <% presets.forEach(p => { %>
+            <button type="button" class="btn preset" data-preset="<%= JSON.stringify(p) %>">
+              <i style="background: <%= p.Accent %>"></i><i style="background: <%= p.Bg %>"></i><%= p.name %>
+            </button>
+          <% }) %>
+        </div>
+        <div class="swatches" style="margin-top: 14px">
+          <% colours.forEach(c => { %>
+            <label class="colour-field">
+              <input type="color" name="<%= c.key %>" value="<%= form[c.key] %>">
+              <span><%= c.label %></span>
+              <code data-hex="<%= c.key %>"><%= form[c.key] %></code>
+            </label>
+          <% }) %>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>App icon (favicon)</h2>
+        <p class="muted small">Shown in the browser tab and as the icon if she adds the app to her iPhone home screen. Use a square PNG, ideally 180 × 180, under 45 KB.</p>
+        <div class="favicon-row">
+          <img id="favicon-preview" src="<%= settings.Favicon ? '/favicon?v=' + faviconVersion : '' %>" alt="Current icon" <%= settings.Favicon ? '' : 'hidden' %>>
+          <label style="flex: 1; margin: 0">Upload icon <input type="file" name="favicon" accept="image/png,image/x-icon,image/vnd.microsoft.icon,image/jpeg,image/gif,image/webp"></label>
+        </div>
+        <% if (settings.Favicon) { %>
+          <label style="flex-direction: row; align-items: center; gap: 8px; margin-top: 8px"><input type="checkbox" name="removeFavicon" value="1"> Remove the current icon</label>
+        <% } %>
+      </section>
+    </div>
+
+    <section class="card">
+      <h2>Preview</h2>
+      <div class="preview" id="theme-preview">
+        <div class="pv-head" style="background: var(--header-bg); color: var(--ink)"><span id="pv-name"><%= form.AppName %></span><span style="color: var(--accent); font-weight: 400">Log out</span></div>
+        <div class="pv-body" style="background: var(--bg); color: var(--ink)">
+          <strong>Tax year 2026-27</strong>
+          <span style="color: var(--muted); font-size: .85rem">06/04/2026 to 05/04/2027</span>
+          <span><span class="btn primary">+ Record a sale</span> <span class="btn">+ Expense</span></span>
+          <div class="pv-card" style="background: var(--card)">
+            <div style="color: var(--muted); font-size: .85rem">Turnover</div>
+            <strong style="font-size: 1.3rem">£1,234.00</strong>
+            <div><a href="#" onclick="return false">View sales</a></div>
+          </div>
+        </div>
+      </div>
+      <p class="muted small">The preview updates as you change things. Nothing is saved until you press Save.</p>
+    </section>
+  </div>
+  <div class="actions">
+    <button type="submit" class="primary">Save settings</button>
+  </div>
+</form>
+
+<form method="post" action="/settings/reset" class="card">
+  <h2>Start again</h2>
+  <p class="muted small">Puts the name and colours back to the originals. The icon is kept.</p>
+  <button type="submit" class="btn">Reset to defaults</button>
+</form>
+<%- include('partials/footer') %>

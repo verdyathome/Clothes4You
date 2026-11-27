@@ -3,14 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
-  <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %>Clothing Portal</title>
+  <title><%= typeof title !== 'undefined' ? title + ' · ' : '' %><%= settings.AppName %></title>
   <link rel="stylesheet" href="/style.css">
+  <style>:root{<%- themeCss %>}</style>
+  <meta name="theme-color" content="<%= settings.HeaderBg %>">
+  <meta name="apple-mobile-web-app-title" content="<%= settings.AppName %>">
+  <% if (settings.Favicon) { %>
+  <link rel="icon" href="/favicon?v=<%= faviconVersion %>">
+  <link rel="apple-touch-icon" href="/favicon?v=<%= faviconVersion %>">
+  <% } %>
 </head>
 <body>
 <% if (user) { %>
 <header class="topbar">
-  <a class="brand" href="/">Clothing Portal</a>
+  <a class="brand" href="/"><%= settings.AppName %></a>
   <nav aria-label="Main">
     <% [['/', 'Dashboard', path === '/'],
         ['/items', 'Items', path.startsWith('/items')],
@@ -20,7 +26,16 @@
       <a href="<%= href %>" class="<%= on ? 'on' : '' %>"<%- on ? ' aria-current="page"' : '' %>><%= label %></a>
     <% }) %>
   </nav>
-  <form method="post" action="/logout" class="logout"><button type="submit" class="link"><%= user %> · Log out</button></form>
+  <div class="usermenu">
+    <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="menu-panel" aria-label="Menu">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="menu-panel" id="menu-panel">
+      <span class="menu-user">Signed in as <%= user %></span>
+      <a href="/settings" class="<%= path.startsWith('/settings') ? 'on' : '' %>"<%- path.startsWith('/settings') ? ' aria-current="page"' : '' %>>Settings</a>
+      <form method="post" action="/logout" class="logout"><button type="submit" class="link">Log out</button></form>
+    </div>
+  </div>
 </header>
 <% } %>
 <main>

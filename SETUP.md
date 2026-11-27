@@ -1,4 +1,4 @@
-# Clothing Portal — setup (v0.2.0)
+# Clothing Portal — setup (v0.3.0)
 
 ## 1. Create the Caspio tables
 
@@ -77,6 +77,15 @@ Create four tables in Caspio (CSP_Expenses was added in v0.2.0). Field names are
 | CreatedBy | Text (255) | |
 
 `caspio/CSP_Expenses.csv` can be imported to create it — then set the types above, add `ExpenseID` (AutoNumber) and `Receipt` (Attachment), and delete the sample row.
+
+### CSP_Settings *(v0.3.0)*
+| Field | Caspio type | Notes |
+|---|---|---|
+| SettingID | AutoNumber | unique |
+| SettingKey | Text (255) | unique — AppName, Accent, AccentInk, Bg, Card, HeaderBg, Ink, Favicon, FaviconType |
+| SettingValue | Text (64000) | the favicon is stored here as base64 (max 45 KB image) |
+
+Until this table exists the app runs on its default name and colours, and saving settings shows an error.
 
 Optional: add indexes on `TaxYear` (Purchases, Sales) and `Status` (Items).
 

@@ -1,5 +1,50 @@
 // Purchase form: add/remove item rows and show how the cost will be shared.
 (function () {
+  // Hamburger menu (phones): open/close, close on outside tap or Escape.
+  const toggle = document.querySelector('.menu-toggle');
+  const panel = document.getElementById('menu-panel');
+  if (toggle && panel) {
+    const setOpen = (open) => {
+      panel.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', String(open));
+    };
+    toggle.addEventListener('click', (e) => { e.stopPropagation(); setOpen(!panel.classList.contains('open')); });
+    document.addEventListener('click', (e) => { if (!panel.contains(e.target)) setOpen(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && panel.classList.contains('open')) { setOpen(false); toggle.focus(); } });
+  }
+
+  // Settings page: presets fill the pickers, live preview follows every change.
+  const sform = document.getElementById('settings-form');
+  if (sform) {
+    const preview = document.getElementById('theme-preview');
+    const map = { Accent: '--accent', AccentInk: '--accent-ink', Bg: '--bg', Card: '--card', HeaderBg: '--header-bg', Ink: '--ink' };
+    const sync = () => {
+      for (const [key, css] of Object.entries(map)) {
+        const input = sform.querySelector(`input[name="${key}"]`);
+        preview.style.setProperty(css, input.value);
+        const code = sform.querySelector(`[data-hex="${key}"]`);
+        if (code) code.textContent = input.value;
+      }
+      const name = sform.querySelector('input[name="AppName"]').value.trim();
+      document.getElementById('pv-name').textContent = name || 'Clothing Portal';
+    };
+    sform.addEventListener('input', sync);
+    document.querySelectorAll('.preset').forEach((btn) => btn.addEventListener('click', () => {
+      const p = JSON.parse(btn.dataset.preset);
+      for (const key of Object.keys(map)) sform.querySelector(`input[name="${key}"]`).value = p[key];
+      sync();
+    }));
+    const fav = sform.querySelector('input[name="favicon"]');
+    if (fav) fav.addEventListener('change', () => {
+      const f = fav.files[0];
+      const img = document.getElementById('favicon-preview');
+      if (f && img) { img.src = URL.createObjectURL(f); img.hidden = false; }
+    });
+    sync();
+  }
+})();
+
+(function () {
   const form = document.getElementById('purchase-form');
   if (form) {
     const rows = document.getElementById('item-rows');
