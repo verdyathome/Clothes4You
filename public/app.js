@@ -1,5 +1,36 @@
 // Purchase form: add/remove item rows and show how the cost will be shared.
 (function () {
+  // Any form that saves something: disable its buttons as soon as it is sent,
+  // so a double-tap can't submit twice. The clicked button's name/value is kept.
+  document.querySelectorAll('form[method="post"], form[method="POST"]').forEach((form) => {
+    form.addEventListener('submit', (e) => {
+      if (form.dataset.sending) { e.preventDefault(); return; }
+      form.dataset.sending = '1';
+      const by = e.submitter;
+      if (by && by.name) {
+        const keep = document.createElement('input');
+        keep.type = 'hidden'; keep.name = by.name; keep.value = by.value;
+        form.appendChild(keep);
+      }
+      // Disable after the browser has captured the form data
+      setTimeout(() => {
+        form.querySelectorAll('button[type="submit"], button:not([type]), input[type="submit"]').forEach((b) => {
+          b.disabled = true;
+          b.setAttribute('aria-disabled', 'true');
+          if (b === by && b.dataset.busy) b.textContent = b.dataset.busy;
+        });
+      }, 0);
+    });
+  });
+  // Coming back with the Back button can restore a disabled page from cache: re-enable it
+  window.addEventListener('pageshow', (e) => {
+    if (!e.persisted) return;
+    document.querySelectorAll('form[data-sending]').forEach((form) => {
+      delete form.dataset.sending;
+      form.querySelectorAll('button[disabled], input[type="submit"][disabled]').forEach((b) => { b.disabled = false; b.removeAttribute('aria-disabled'); });
+    });
+  });
+
   // Hamburger menu (phones): open/close, close on outside tap or Escape.
   const toggle = document.querySelector('.menu-toggle');
   const panel = document.getElementById('menu-panel');
