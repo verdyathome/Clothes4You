@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 — 2026-11-27
+- Two-step confirmation for actions that can't easily be undone: **Reset to defaults**, **Save refund** and **writing an item off**. The first tap turns the button red ("Tap again to…") with a Cancel button; it resets itself after 6 seconds
+- The server also refuses these actions unless they were confirmed
+- Help guides updated
+
 ## 0.5.0 — 2026-11-27
 - **Login screen background photo** (Settings), with a darkness slider and live preview; photos are shrunk to WebP automatically and stored in CSP_Settings in pieces
 - Login screen redesigned: centred card with the app icon and name

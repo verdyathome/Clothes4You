@@ -47,4 +47,4 @@ From then on, tapping the icon opens the app **full-screen** (no Safari address 
 
 ## Start again
 
-**Reset to defaults** puts the name and colours back to the originals. The icon is kept.
+**Reset to defaults** puts the name and colours back to the originals: tap it **twice** to confirm (the first tap turns it red). The app icon and login photo are kept.

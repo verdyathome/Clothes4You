@@ -245,7 +245,9 @@ app.post('/items/:id/status', wrap(async (req, res) => {
   const item = await svc.getItem(req.params.id);
   if (!item) return res.status(404).render('error', { message: 'Item not found.' });
   const { Status, ListedOn } = req.body;
-  if (item.Status === 'Sold') {
+  if (Status === 'Written off' && req.body.confirmed !== '1') {
+    req.flash('error', 'The item was not written off. Tap "Update" twice to confirm.');
+  } else if (item.Status === 'Sold') {
     req.flash('error', 'Sold items can\'t be changed here. Record a refund with "item returned" to put it back in stock.');
   } else if (['In stock', 'Listed', 'Written off'].includes(Status)) {
     await svc.updateItemStatus(item.ItemID, Status, Status === 'Listed' ? ListedOn || '' : '');
@@ -280,6 +282,10 @@ app.post('/sales', wrap(async (req, res) => {
 app.post('/sales/:id/refund', wrap(async (req, res) => {
   const sale = await svc.getSale(req.params.id);
   if (!sale) return res.status(404).render('error', { message: 'Sale not found.' });
+  if (req.body.confirmed !== '1') {
+    req.flash('error', 'The refund was not saved. Tap "Save refund" twice to confirm.');
+    return res.redirect(`/items/${sale.ItemID}`);
+  }
   try {
     const r = await svc.recordRefund(sale.SaleID, req.body);
     req.flash('ok', `Refund of ${money(r.amount)} recorded${r.returned ? ' and the item is back in stock' : ''}.`);
@@ -410,6 +416,10 @@ app.post('/settings', (req, res, next) => settingsUpload(req, res, (err) => {
   }
 }));
 app.post('/settings/reset', wrap(async (req, res) => {
+  if (req.body.confirmed !== '1') {
+    req.flash('error', 'Nothing was reset. Tap "Reset to defaults" twice to confirm.');
+    return res.redirect('/settings');
+  }
   await settingsSvc.reset();
   req.flash('ok', 'Name and colours reset to the defaults.');
   res.redirect('/settings');

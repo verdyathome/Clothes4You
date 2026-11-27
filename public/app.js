@@ -1,5 +1,54 @@
 // Purchase form: add/remove item rows and show how the cost will be shared.
 (function () {
+  // Two-step buttons: the first tap arms the button ("Tap again to…") with a Cancel
+  // beside it; the second tap within 6 seconds goes ahead. Used for actions that
+  // can't easily be undone. data-confirm-when="Field=Value" only asks in that case.
+  document.querySelectorAll('button[data-confirm]').forEach((btn) => {
+    const form = btn.form;
+    const label = btn.textContent;
+    let timer = null;
+    let cancel = null;
+    const needsConfirm = () => {
+      const when = btn.dataset.confirmWhen;
+      if (!when) return true;
+      const [field, value] = when.split('=');
+      const el = form.elements[field];
+      return !!el && el.value === value;
+    };
+    const disarm = () => {
+      clearTimeout(timer);
+      btn.classList.remove('armed');
+      btn.textContent = label;
+      btn.removeAttribute('aria-live');
+      if (cancel) { cancel.remove(); cancel = null; }
+      const h = form.querySelector('input[name="confirmed"]');
+      if (h) h.remove();
+    };
+    btn.addEventListener('click', (e) => {
+      if (!needsConfirm()) return;
+      if (btn.classList.contains('armed')) {
+        const h = document.createElement('input');
+        h.type = 'hidden'; h.name = 'confirmed'; h.value = '1';
+        form.appendChild(h);
+        clearTimeout(timer);
+        return; // let the form submit
+      }
+      e.preventDefault();
+      btn.classList.add('armed');
+      btn.setAttribute('aria-live', 'polite');
+      btn.textContent = btn.dataset.confirm;
+      cancel = document.createElement('button');
+      cancel.type = 'button';
+      cancel.className = 'btn';
+      cancel.textContent = 'Cancel';
+      cancel.addEventListener('click', disarm);
+      btn.after(cancel);
+      timer = setTimeout(disarm, 6000);
+    });
+    // Changing the form (e.g. picking a different status) cancels a pending confirmation
+    form.addEventListener('input', () => { if (btn.classList.contains('armed')) disarm(); });
+  });
+
   // Any form that saves something: disable its buttons as soon as it is sent,
   // so a double-tap can't submit twice. The clicked button's name/value is kept.
   document.querySelectorAll('form[method="post"], form[method="POST"]').forEach((form) => {
