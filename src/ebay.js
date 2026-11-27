@@ -5,6 +5,8 @@
 // Column names are matched loosely because eBay changes them from time to time.
 const { parseCsv } = require('./csv');
 
+// eBay writes "--" in empty cells
+const blank = (s) => { const t = String(s || '').trim(); return /^-+$/.test(t) ? '' : t; };
 const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
 
 const MONTHS = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
@@ -24,7 +26,7 @@ function parseDate(s) {
 }
 
 const amount = (s) => {
-  const n = Number(String(s || '').replace(/[£$€,\s]/g, '').replace(/^\((.*)\)$/, '-$1'));
+  const n = Number(blank(s).replace(/[£$€,\s]/g, '').replace(/^\((.*)\)$/, '-$1'));
   return Number.isFinite(n) ? n : 0;
 };
 
@@ -57,7 +59,7 @@ function parse(text) {
   for (const r of table.slice(headerIdx + 1)) {
     const get = (i) => (i >= 0 ? r[i] || '' : '');
     const type = norm(get(cols.type));
-    const orderRef = get(cols.order).trim();
+    const orderRef = blank(get(cols.order));
     if (!orderRef && !type) continue;
 
     if (type && type.startsWith('shipping label')) {
@@ -78,8 +80,8 @@ function parse(text) {
     const row = {
       orderRef,
       date: parseDate(get(cols.date)),
-      title: get(cols.title).trim(),
-      customLabel: get(cols.label).trim(),
+      title: blank(get(cols.title)),
+      customLabel: blank(get(cols.label)),
       quantity: Number(get(cols.qty)) || 1,
       price: amount(get(cols.subtotal)),
       buyerPostage: amount(get(cols.postage)),

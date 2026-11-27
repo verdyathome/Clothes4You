@@ -332,7 +332,16 @@ async function prepareEbayImport(rows) {
 
 // rows[].ItemID is an existing item number, or "new-business" / "new-personal"
 // to create the item from the eBay order first (for past sales not yet in the app).
-async function importEbay(rows, user) {
+// Imports run one at a time, so a double-tap or two people importing at once
+// can't both pass the "already imported" check and create duplicates.
+let importQueue = Promise.resolve();
+function importEbay(rows, user) {
+  const run = importQueue.then(() => importEbayNow(rows, user));
+  importQueue = run.catch(() => {});
+  return run;
+}
+
+async function importEbayNow(rows, user) {
   const done = [];
   const errors = [];
   const sales = await db.select(T.sales.name);
@@ -347,6 +356,12 @@ async function importEbay(rows, user) {
     }
     if (!isNew && usedItems.has(String(r.ItemID))) {
       errors.push(`Order ${r.OrderRef}: item #${r.ItemID} was chosen for more than one order, skipped.`);
+      continue;
+    }
+    // Check the sale itself before creating anything, so a rejected order leaves no stray item
+    if (!isDate(r.SaleDate)) { errors.push(`Order ${r.OrderRef}: no sale date, skipped.`); continue; }
+    try { if (toPence(r.SalePrice) <= 0) throw new Error(); } catch {
+      errors.push(`Order ${r.OrderRef}: no sale price in the eBay report, skipped.`);
       continue;
     }
     try {

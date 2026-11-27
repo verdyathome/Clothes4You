@@ -158,3 +158,4 @@ code { background: var(--soft); padding: 1px 5px; border-radius: 4px; }
   .import-table td:last-child { grid-column: 1 / -1; margin-top: 6px; }
   .import-table .item-pick { max-width: none; width: 100%; min-height: 44px; }
 }
+button[disabled], .btn[disabled] { opacity: .6; cursor: progress; }

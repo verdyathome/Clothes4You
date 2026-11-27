@@ -1,6 +1,6 @@
 {
   "name": "clothing-portal",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Record-keeping portal for a UK sole-trader clothing resale business (Vinted / eBay), HMRC Self Assessment friendly",
   "main": "server.js",
   "private": true,

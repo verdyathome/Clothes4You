@@ -10,7 +10,7 @@
 <form method="post" action="/import/ebay" enctype="multipart/form-data" class="card">
   <h2>2. Upload it</h2>
   <label>eBay CSV file <input type="file" name="report" accept=".csv,text/csv" required></label>
-  <button type="submit" class="primary">Check file</button>
+  <button type="submit" class="primary" data-busy="Reading file…">Check file</button>
   <p class="muted small">Nothing is saved until you confirm on the next page. Orders already imported are skipped.</p>
 </form>
 <%- include('partials/footer') %>

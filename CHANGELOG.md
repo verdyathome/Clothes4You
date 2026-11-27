@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3 — 2026-11-27
+- After an eBay import the app goes to the Dashboard, opened on the tax year of the imported sales, with the "eBay import complete" banner
+- Buttons on every save form are disabled as soon as they're pressed ("Importing… please wait" on the import), so a double-tap can't submit twice
+- Imports now run one at a time on the server, so two submissions can't both get past the "already imported" check
+- Fix: an order the app couldn't import (no price/date) used to leave a new item behind with no sale — the sale is now checked first
+- eBay "--" placeholder cells are treated as empty (no more items named "--")
+
 ## 0.3.2 — 2026-11-27
 - eBay import: "Create new business item" / "Create new personal item" on each order, for past sales not yet in the app — the item is named from the eBay title and the sale imported in one step
 - Business items can be given what was paid and when: recorded as a one-item stock purchase so the cost counts in that tax year

@@ -248,12 +248,16 @@ app.post('/import/ebay/confirm', wrap(async (req, res) => {
   })).filter((r) => r.ItemID && isDate(r.SaleDate));
   if (!rows.length) {
     req.flash('error', 'Nothing was imported — every order was left as "Don\'t import". Choose an existing item or "Create new item" for each order you want to bring in.');
-    return res.redirect('/import/ebay');
+    return res.redirect('/');
   }
   const { done, errors } = await svc.importEbay(rows, req.session.user);
   const created = done.filter((d) => d.createdItem).length;
-  req.flash(errors.length ? 'error' : 'ok', `Imported ${done.length} eBay sale(s)${created ? `, creating ${created} new item(s)` : ''}.${errors.length ? ' ' + errors.join(' ') : ''}`);
-  res.redirect('/sales');
+  req.flash(errors.length ? 'error' : 'ok', `eBay import complete: ${done.length} sale(s) imported${created ? `, ${created} new item(s) created` : ''}.${errors.length ? ' ' + errors.join(' ') : ''}`);
+  // Open the dashboard on the tax year most of the imported sales belong to
+  const years = {};
+  for (const d of done) years[d.TaxYear] = (years[d.TaxYear] || 0) + 1;
+  const ty = Object.keys(years).sort((a, b) => years[b] - years[a])[0];
+  res.redirect(ty ? `/?ty=${encodeURIComponent(ty)}` : '/');
 }));
 
 // ---------- Expenses ----------
