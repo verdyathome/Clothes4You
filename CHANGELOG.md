@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.2 — 2026-11-27
+- Phone layout: title and log out on one row, the five pages in an equal-width row underneath (current page highlighted)
+- Phone dashboard: full-width "Record a sale" button, other actions share a row, figure tiles in a 2×2 grid
+- Respects the iPhone notch / Dynamic Island safe area; desktop layout unchanged
+
+## 0.2.1 — 2026-11-26
+- Login usernames ignore capitals and leading/trailing spaces (phones capitalising "Kate" no longer fail)
+- Username box turns off autocorrect/spellcheck
+- Logs which usernames are configured at startup, and failed login attempts (never passwords)
+
 ## 0.2.0 — 2026-11-26
 **Needs Caspio changes before merging** — see SETUP.md: new table `CSP_Expenses`, and new fields `RefundDate`, `RefundAmount`, `ItemReturned` on `CSP_Sales`.
 - Expenses: everyday expense types mapped to SA103 categories, mileage at 45p/mile, receipt photo/PDF stored in a Caspio Attachment field, "save and add another"

@@ -8,7 +8,7 @@ const svc = require('./src/services');
 const db = require('./src/db');
 const ebay = require('./src/ebay');
 const { buildWorkbook } = require('./src/export');
-const { checkLogin, requireLogin } = require('./src/auth');
+const { checkLogin, requireLogin, normUser } = require('./src/auth');
 const { money, today, isDate, taxYearOf, ukDate } = require('./src/util');
 
 const app = express();
@@ -64,10 +64,11 @@ async function yearChoice(req) {
 app.get('/login', (req, res) => res.render('login', { error: null }));
 app.post('/login', (req, res) => {
   const { username = '', password = '' } = req.body;
-  if (checkLogin(username.trim(), password)) {
-    req.session.user = username.trim();
+  if (checkLogin(username, password)) {
+    req.session.user = normUser(username);
     return res.redirect('/');
   }
+  console.warn(`Failed login for username "${normUser(username).slice(0, 40)}"`);
   res.status(401).render('login', { error: 'Username or password not recognised.' });
 });
 app.post('/logout', (req, res) => {
